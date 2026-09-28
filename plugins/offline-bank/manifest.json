@@ -1,0 +1,12 @@
+{
+  "format": "dotobe-plugin",
+  "id": "offline-bank",
+  "name": "本地题库",
+  "version": "1.0.0",
+  "description": "把试卷缓存到本地，无网也能刷题与即时判分，适合通勤、宿舍断网等场景。",
+  "icon": "offline",
+  "minClient": "2.2.0",
+  "roles": null,
+  "entry": "js/index.js",
+  "css": ["css/offline-bank.css"]
+}

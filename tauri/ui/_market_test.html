@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>市场页渲染桩测</title>
+<link rel="stylesheet" href="css/tokens.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/pages.css?v=20260928" />
+<link rel="stylesheet" href="css/market.css?v=20260928" />
+</head>
+<body>
+  <!-- 桩：mock window.__TAURI__，让 market.js 的完整渲染链路在浏览器里可测。
+       结果写入 #result，供自动化/人工核对。 -->
+  <div id="result" style="padding:12px;font-family:monospace;white-space:pre-wrap"></div>
+  <div id="app"></div>
+  <div id="toasts"></div>
+  <div id="modal-root"></div>
+  <script>
+    window.__TAURI__ = {
+      core: {
+        invoke: async (cmd, args) => {
+          switch (cmd) {
+            case "get_config": return { base_url: "https://your-server.example.com" };
+            case "get_data_location": return { current: "C:/Users/x/DotobeClientWeb", firstRun: false };
+            case "is_offline": return false;
+            case "load_local_cache": return null;
+            case "plugin_list_installed": return [{
+              format: "dotobe-plugin", id: "knowledge", name: "知识树", version: "1.0.0",
+              description: "已装描述", icon: "tree", minClient: "2.2.0", roles: null,
+              entry: "js/index.js", css: ["css/knowledge.css"]
+            }];
+            case "api_request": {
+              // 目录 API：5 个插件，含 1 个已装(knowledge)、1 个教师专用、1 个低版本客户端不可装
+              const plugins = [
+                { id: 1, key: "study-records", name: "学习记录", version: "1.0.0", description: "进行中/历史/错题本。", icon: "history", min_client: "2.2.0", roles: null, file_size: 16384, file_size_text: "16 KB", sha256: "aa", sort: 10, download_url: "backend/api/download_plugin.php?id=1" },
+                { id: 2, key: "knowledge", name: "知识树", version: "1.1.0", description: "知识树描述。", icon: "tree", min_client: "2.2.0", roles: null, file_size: 20025, file_size_text: "19.6 KB", sha256: "bb", sort: 20, download_url: "backend/api/download_plugin.php?id=2" },
+                { id: 3, key: "offline-bank", name: "本地题库", version: "1.0.0", description: "离线刷题。", icon: "offline", min_client: "2.2.0", roles: null, file_size: 3438, file_size_text: "3.4 KB", sha256: "cc", sort: 30, download_url: "backend/api/download_plugin.php?id=3" },
+                { id: 4, key: "teaching-tools", name: "教学工具", version: "1.0.0", description: "教师专用。", icon: "bank", min_client: "2.2.0", roles: ["teacher", "admin"], file_size: 16135, file_size_text: "15.8 KB", sha256: "dd", sort: 40, download_url: "backend/api/download_plugin.php?id=4" },
+                { id: 5, key: "guild", name: "冒险公会", version: "1.0.0", description: "公会。", icon: "hall", min_client: "9.9.9", roles: null, file_size: 39544, file_size_text: "38.6 KB", sha256: "ee", sort: 50, download_url: "backend/api/download_plugin.php?id=5" }
+              ];
+              return { ok: true, status: 200, text: JSON.stringify({ success: true, data: { plugins } }), offline: false };
+            }
+            default: throw new Error("桩未实现命令: " + cmd);
+          }
+        },
+        convertFileSrc: (p) => "http://asset.localhost/" + encodeURIComponent(p),
+      },
+      event: { emit: async () => {} },
+      app: { getVersion: async () => "2.2.0" },
+      dialog: {},
+      window: {
+        getCurrentWindow: () => ({
+          minimize: () => {}, toggleMaximize: () => {}, close: () => {},
+          onResized: () => {},
+        }),
+      },
+    };
+  </script>
+  <script type="module">
+    const out = (msg) => { document.getElementById("result").textContent += msg + "\n"; };
+    try {
+      const { renderMarket } = await import("./js/pages/market.js");
+      const { session } = await import("./js/api.js");
+      const { registerActivePlugin } = await import("./js/plugin-state.js");
+      session.setUser({ id: 3, username: "tester", full_name: "桩测试", user_type: "admin" });
+      // 模拟启动时已激活 knowledge（v1.0.0）：市场目录是 v1.1.0 → 应显示“已安装 + 可更新 + 卸载”
+      registerActivePlugin("knowledge", {
+        manifest: { format: "dotobe-plugin", id: "knowledge", name: "知识树", version: "1.0.0", icon: "tree", entry: "js/index.js", css: ["css/knowledge.css"] },
+        def: { routes: [{ name: "knowledge", render: async () => {} }] },
+        cssLinks: [],
+      });
+      const container = document.createElement("div");
+      await renderMarket(container);
+      document.getElementById("app").append(container);
+      const cards = container.querySelectorAll(".plugin-card");
+      out("render OK: cards=" + cards.length);
+      cards.forEach((c, i) => {
+        out(`[${i}] ` + c.querySelector(".plugin-name").textContent
+          + " | ver=" + c.querySelector(".plugin-ver").textContent
+          + " | state=" + (c.querySelector(".state")?.textContent || "-")
+          + " | btns=" + [...c.querySelectorAll(".plugin-foot-btns .btn")].map((b) => b.textContent + (b.disabled ? "(禁)" : "")).join(","));
+      });
+      const tags = container.querySelectorAll(".tag.role");
+      out("教师专用标签数=" + tags.length);
+      out("FAIL-CHECK: 含可更新标签=" + (container.textContent.includes("可更新") ? "是" : "否"));
+    } catch (e) {
+      out("RENDER THREW: " + (e?.message || e) + "\n" + String(e?.stack || "").slice(0, 500));
+    }
+  </script>
+</body>
+</html>

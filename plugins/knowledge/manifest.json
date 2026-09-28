@@ -1,0 +1,12 @@
+{
+  "format": "dotobe-plugin",
+  "id": "knowledge",
+  "name": "知识树",
+  "version": "1.0.0",
+  "description": "按科目构建知识点树，挂接错题与笔记，学习脉络一目了然，支持离线缓存与导出分享。",
+  "icon": "tree",
+  "minClient": "2.2.0",
+  "roles": null,
+  "entry": "js/index.js",
+  "css": ["css/knowledge.css"]
+}

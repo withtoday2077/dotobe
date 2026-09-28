@@ -1,0 +1,4 @@
+# 本机使用 rustup 自带 self-contained MinGW 链接（x86_64-pc-windows-gnu），
+# 无需外置 MSYS2 路径。若换回需外置 binutils 的环境，恢复：
+# [target.x86_64-pc-windows-gnu]
+# rustflags = ["-C", "link-arg=-L<mingw64>/lib"]

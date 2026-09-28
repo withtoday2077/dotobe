@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>途变在线考试系统 · 知道你在改变</title>
+  <script>
+    // 首帧前同步定主题，避免深色用户看到浅色闪屏（与 splashscreen 同法；
+    // custom:<id> 先按基础皮肤渲染，JS 起来后 restoreTheme 再恢复完整主题包）
+    (function () {
+      try {
+        if (localStorage.getItem("dotobe.theme") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        }
+      } catch (e) { /* 拿不到 localStorage 时保持浅色 */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="assets/katex/katex.min.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/pages.css?v=20260928" />
+  <link rel="stylesheet" href="css/market.css?v=20260928" />
+  <link rel="stylesheet" href="css/loading-scene.css" />
+  <link rel="stylesheet" href="css/exam-sim.css" />
+  <style>
+    /* —— 启动衔接层：与 splashscreen 窗口同一画面。主窗口显示瞬间两者像素级
+       相接，用户无感切换；markAppReady() 后整体 500ms 淡出并移除。 —— */
+    #boot-splash {
+      position: fixed; inset: 0; z-index: 99998; /* 低于 __fatal 错误横幅，保证致命错误可见 */
+      display: grid; place-items: center;
+      background: var(--rice);
+      font-family: var(--font);
+      overflow: hidden;
+      transition: opacity 500ms var(--ease);
+    }
+    html:not([data-theme="dark"]) #boot-splash {
+      background: #f6f4ef;
+      background-image: radial-gradient(ellipse 80% 70% at 50% 42%,
+        #fefdfb 0%, #f4f1ea 52%, #e8e4da 100%);
+    }
+    #boot-splash.boot-fade { opacity: 0; pointer-events: none; }
+    #boot-splash .bs-center { display: flex; flex-direction: column; align-items: center; }
+    #boot-splash .bs-logo {
+      font-size: var(--fs-hero); font-weight: 200; letter-spacing: 0.04em;
+      color: var(--sky);
+      animation: boot-logo-in 900ms var(--wa-ease) both;
+    }
+    #boot-splash .bs-tagline {
+      margin-top: 14px; font-size: var(--fs-small); font-weight: 300;
+      color: var(--text-2); letter-spacing: 0.32em; text-indent: 0.32em;
+      animation: boot-rise var(--dur) var(--wa-ease) 250ms both;
+    }
+    #boot-splash .bs-dots {
+      display: flex; gap: 12px; margin-top: 56px;
+      animation: boot-rise var(--dur) var(--wa-ease) 500ms both;
+    }
+    #boot-splash .bs-dots i {
+      width: 8px; height: 8px; border-radius: var(--r-full);
+      animation: boot-breathe 2.4s var(--ease) infinite both;
+    }
+    #boot-splash .bs-dots i:nth-child(1) { background: var(--sky); }
+    #boot-splash .bs-dots i:nth-child(2) { background: var(--mint); animation-delay: 0.3s; }
+    #boot-splash .bs-dots i:nth-child(3) { background: var(--powder); animation-delay: 0.6s; }
+    #boot-splash .bs-flora { position: absolute; inset: 0; pointer-events: none; }
+    #boot-splash .bs-plant { position: absolute; opacity: 0.85; }
+    #boot-splash .bs-plant svg {
+      width: 100%; height: 100%; display: block;
+      transform-origin: 50% 100%; /* 摇曳以根部为轴 */
+      animation: boot-sway var(--sdur, 7s) var(--ease) var(--sd, 3s) infinite alternate;
+    }
+    #boot-splash path, #boot-splash circle {
+      fill: none; stroke: var(--mint); stroke-width: 1; stroke-linecap: round;
+      stroke-dasharray: 1; stroke-dashoffset: 0;
+      animation: boot-draw var(--dd, 1.4s) var(--ease) var(--d, 0s) both;
+    }
+    #boot-splash circle { stroke: var(--pink); }
+    @keyframes boot-draw {
+      0%   { stroke-dashoffset: 1; opacity: 0; } /* 起笔前隐藏圆头伪影 */
+      8%   { opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+    @keyframes boot-logo-in {
+      from { opacity: 0; letter-spacing: 0.3em; }
+      to   { opacity: 1; letter-spacing: 0.04em; }
+    }
+    @keyframes boot-rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes boot-breathe {
+      0%, 100% { transform: scale(0.72); opacity: 0.45; }
+      50%      { transform: scale(1);    opacity: 1; }
+    }
+    @keyframes boot-sway {
+      from { transform: rotate(-0.6deg); }
+      to   { transform: rotate(0.6deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #boot-splash, #boot-splash * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 启动衔接层标记与内联变量须与 splashscreen.html 保持一致（叶根贴茎的贝塞尔取点同源） -->
+  <div id="boot-splash" aria-hidden="true">
+    <div class="bs-flora">
+      <span class="bs-plant" style="left:3.5%; top:6%; width:300px; height:360px; --sd:3.2s; --sdur:7s">
+        <svg viewBox="0 0 120 140">
+          <path pathLength="1" style="--d:.15s; --dd:1.6s" d="M28 132 C 46 96, 40 62, 58 18" />
+          <path pathLength="1" style="--d:.95s; --dd:.85s" d="M40 94 C 24 90, 13 77, 11 58 C 31 62, 40 76, 40 94 Z" />
+          <path pathLength="1" style="--d:1.2s; --dd:.8s" d="M44 77 C 63 73, 76 60, 79 42 C 60 46, 47 59, 44 77 Z" />
+          <path pathLength="1" style="--d:1.45s; --dd:.7s" d="M47 60 C 34 56, 26 45, 24 30 C 40 34, 47 45, 47 60 Z" />
+          <circle pathLength="1" style="--d:1.75s; --dd:.6s" cx="58" cy="11" r="4.5" />
+          <circle pathLength="1" style="--d:1.9s; --dd:.5s" cx="10" cy="54" r="3.5" />
+        </svg>
+      </span>
+      <span class="bs-plant" style="right:5%; top:7%; width:210px; height:250px; --sd:4.4s; --sdur:8s">
+        <svg viewBox="0 0 120 140">
+          <path pathLength="1" style="--d:.4s; --dd:1.4s" d="M96 128 C 78 100, 74 70, 88 30" />
+          <path pathLength="1" style="--d:1.05s; --dd:.8s" d="M81 93 C 95 89, 105 77, 107 61 C 91 65, 83 77, 81 93 Z" />
+          <path pathLength="1" style="--d:1.3s; --dd:.8s" d="M80 74 C 66 70, 58 58, 56 42 C 72 46, 80 58, 80 74 Z" />
+          <path pathLength="1" style="--d:1.55s; --dd:.7s" d="M82 53 C 94 49, 100 39, 102 27 C 90 31, 84 41, 82 53 Z" />
+          <circle pathLength="1" style="--d:1.8s; --dd:.5s" cx="89" cy="24" r="3.5" />
+        </svg>
+      </span>
+      <span class="bs-plant" style="left:5%; bottom:6%; width:200px; height:235px; --sd:3.8s; --sdur:6.5s">
+        <svg viewBox="0 0 120 140">
+          <path pathLength="1" style="--d:.3s; --dd:1.2s" d="M30 132 C 34 104, 30 82, 40 58" />
+          <path pathLength="1" style="--d:.55s; --dd:1.2s" d="M44 132 C 44 108, 52 90, 64 72" />
+          <path pathLength="1" style="--d:.9s; --dd:.7s" d="M58 132 L 58 96" />
+          <path pathLength="1" style="--d:1.25s; --dd:.8s" d="M58 104 C 46 100, 38 88, 36 72 C 52 76, 58 88, 58 104 Z" />
+          <path pathLength="1" style="--d:1.5s; --dd:.8s" d="M58 112 C 70 108, 78 98, 80 84 C 66 88, 60 98, 58 112 Z" />
+        </svg>
+      </span>
+      <span class="bs-plant" style="right:4%; bottom:5%; width:270px; height:320px; --sd:4.7s; --sdur:7.5s">
+        <svg viewBox="0 0 120 140">
+          <path pathLength="1" style="--d:.5s; --dd:1.3s" d="M60 132 L 60 64" />
+          <path pathLength="1" style="--d:1.05s; --dd:.9s" d="M60 88 C 42 84, 30 70, 28 50 C 48 54, 58 68, 60 88 Z" />
+          <path pathLength="1" style="--d:1.3s; --dd:.9s" d="M60 100 C 78 96, 90 82, 92 62 C 72 66, 62 80, 60 100 Z" />
+          <path pathLength="1" style="--d:1.55s; --dd:.7s" d="M60 64 C 52 58, 48 48, 48 36 C 58 42, 62 52, 60 64 Z" />
+          <path pathLength="1" style="--d:.8s; --dd:1s" d="M52 132 C 46 112, 44 96, 48 80" />
+          <path pathLength="1" style="--d:.95s; --dd:1s" d="M70 132 C 76 114, 78 100, 74 86" />
+        </svg>
+      </span>
+    </div>
+    <div class="bs-center">
+      <div class="bs-logo">途变</div>
+      <div class="bs-tagline">知道你在改变</div>
+      <div class="bs-dots"><i></i><i></i><i></i></div>
+    </div>
+  </div>
+  <div id="app"></div>
+  <div id="toasts"></div>
+  <div id="modal-root"></div>
+
+  <script src="assets/katex/katex.min.js"></script>
+  <script src="assets/katex/contrib/mhchem.min.js"></script>
+  <script src="assets/katex/contrib/auto-render.min.js"></script>
+  <script src="assets/xlsx/xlsx.full.min.js"></script>
+  <script src="assets/jszip/jszip.min.js"></script>
+  <!-- 核心模块裸名映射：功能插件包（数据目录动态加载）以 import { api } from "api"
+       引用核心，与壳内相对导入指向同一 URL（同模块实例）。新增核心可被插件引用的
+       模块时须同步登记此处。 -->
+  <script type="importmap">
+  {
+    "imports": {
+      "api": "./js/api.js",
+      "ui": "./js/ui.js",
+      "router": "./js/router.js",
+      "shell": "./js/pages/shell.js",
+      "mobile": "./js/mobile.js",
+      "km-markdown": "./js/km_markdown.js",
+      "win": "./js/win.js",
+      "theme": "./js/theme.js"
+    }
+  }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

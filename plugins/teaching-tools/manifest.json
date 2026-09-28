@@ -1,0 +1,12 @@
+{
+  "format": "dotobe-plugin",
+  "id": "teaching-tools",
+  "name": "教学工具",
+  "version": "1.0.0",
+  "description": "面向教师：题库管理与真题上传，支持 Excel 批量导入、试卷包导入导出。",
+  "icon": "bank",
+  "minClient": "2.2.0",
+  "roles": ["teacher", "admin"],
+  "entry": "js/index.js",
+  "css": ["css/teaching-tools.css"]
+}

@@ -1,0 +1,39 @@
+[package]
+name = "dotobe-tauri"
+version = "2.2.0"
+edition = "2021"
+description = "Dotobe 在线考试系统客户端（Tauri 版）"
+
+[workspace]
+
+# Android/iOS 构建需要 cdylib（WebView 宿主加载）；桌面走 rlib/main.rs
+[lib]
+name = "dotobe_tauri_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# TLS 用 rustls（纯 Rust）：Android 无 OpenSSL 依赖；桌面行为一致（公共 CA 验证）
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "cookies", "multipart", "rustls-tls"] }
+dirs = "5"
+base64 = "0.22"
+
+# 功能插件：解压安装（zip）与包完整性校验（sha256）
+zip = { version = "2", default-features = false, features = ["deflate"] }
+sha2 = "0.10"
+
+url = "2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Security_Cryptography", "Win32_Foundation"] }
+
+[profile.release]
+opt-level = 2
+lto = "thin"
+strip = true

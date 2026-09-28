@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>样例 · 插件市场 — 途变客户端</title>
+<style>
+/* —— 直接复用客户端 tokens.css 的日系清新令牌 —— */
+:root {
+  color-scheme: light;
+  --sky: #64b5f6; --rice: #fafaf8; --mint: #98d8c8; --pink: #ffb7c5; --powder: #b8d4e3;
+  --text: #4a5568; --text-2: #7a8a9e; --text-3: #b0b8c4; --border: #d4d4cf;
+  --faint-bg: #f4f3ef;
+  --ok: #2f7d5f; --warn: #b07818; --danger: #c73e4d; --info: #56789f;
+  --sky-t: rgba(100,181,246,.13); --mint-t: rgba(152,216,200,.16); --pink-t: rgba(255,183,197,.16);
+  --powder-t: rgba(184,212,227,.20); --warn-t: rgba(176,120,24,.10); --ok-t: rgba(47,125,95,.10);
+  --r-card: 1rem; --r-lg: .75rem; --r-md: .625rem; --r-full: 999px;
+  --hairline: 1px solid rgba(212,212,207,.6); --hairline-soft: 1px solid rgba(212,212,207,.35);
+  --ease: cubic-bezier(.45,0,.55,1); --dur: 500ms;
+  --wa-shu: #b5544a;
+  --fs-h1: 1.875rem; --fs-h2: 1.375rem; --fs-h3: 1.0625rem; --fs-body: .9375rem; --fs-small: .8125rem; --fs-tiny: .72rem;
+  --font: "Microsoft YaHei UI","Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { font-family: var(--font); background: var(--rice); color: var(--text); font-size: var(--fs-body); overflow: hidden; }
+
+/* ————— 假窗口：模拟客户端壳 ————— */
+.demo-wrap { display: flex; height: 100vh; max-width: 1280px; margin: 0 auto; border-left: var(--hairline); border-right: var(--hairline); background: var(--rice); }
+.mock-banner { position: fixed; left: 0; right: 0; bottom: 0; z-index: 300; background: var(--faint-bg); border-top: var(--hairline);
+  padding: 8px 18px; font-size: var(--fs-small); color: var(--text-2); display: flex; gap: 16px; align-items: center; }
+.mock-banner b { color: var(--text); }
+.mock-banner .spacer { flex: 1; }
+.mock-btn { border: var(--hairline); background: #fff; color: var(--text); border-radius: var(--r-full); padding: 3px 14px; font-size: var(--fs-tiny); cursor: pointer; transition: all var(--dur) var(--ease); }
+.mock-btn:hover { border-color: var(--sky); color: var(--sky); }
+
+/* ————— 侧栏 ————— */
+.sidebar { width: 216px; flex: none; border-right: var(--hairline); display: flex; flex-direction: column; padding: 20px 14px; gap: 18px; }
+.brand { display: flex; align-items: baseline; gap: 8px; padding: 0 6px; }
+.brand .logo { font-size: 1.25rem; font-weight: 600; letter-spacing: .1em; }
+.brand .tagline { font-size: var(--fs-tiny); color: var(--text-3); }
+.nav-user { padding: 0 6px; }
+.nav-user .name { font-weight: 600; }
+.nav-user .meta { font-size: var(--fs-tiny); color: var(--text-3); margin-top: 2px; }
+.nav-group { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 10px; border: none; background: none; font: inherit; color: var(--text-2);
+  padding: 9px 12px; border-radius: var(--r-md); cursor: pointer; text-align: left; transition: all var(--dur) var(--ease); }
+.nav-item svg { width: 17px; height: 17px; flex: none; }
+.nav-item:hover { background: var(--faint-bg); color: var(--text); }
+.nav-item.active { background: var(--sky-t); color: var(--text); font-weight: 600; }
+.nav-item.plugin-item { color: var(--text-2); }
+.nav-item.enter-anim { animation: navEnter .5s var(--ease); }
+@keyframes navEnter { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.nav-sep { font-size: var(--fs-tiny); color: var(--text-3); padding: 10px 12px 4px; letter-spacing: .15em; }
+.footer { display: flex; flex-direction: column; gap: 8px; }
+.footer .ver { font-size: var(--fs-tiny); color: var(--text-3); text-align: center; }
+.btn { font: inherit; border-radius: var(--r-full); border: var(--hairline); background: #fff; color: var(--text);
+  padding: 7px 18px; cursor: pointer; transition: all var(--dur) var(--ease); }
+.btn:hover { border-color: var(--sky); color: var(--sky); }
+.btn.primary { background: var(--sky); border-color: var(--sky); color: #fff; }
+.btn.primary:hover { filter: brightness(1.05); color: #fff; }
+.btn.sm { padding: 4px 14px; font-size: var(--fs-small); }
+.btn.block { width: 100%; }
+.btn.ghost-danger { color: var(--danger); border-color: transparent; background: none; }
+.btn.ghost-danger:hover { border-color: var(--danger); }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.guild-btn { color: var(--wa-shu); border-color: rgba(181,84,74,.35); }
+.guild-btn:hover { border-color: var(--wa-shu); color: var(--wa-shu); }
+
+/* ————— 主区 ————— */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { height: 52px; flex: none; border-bottom: var(--hairline-soft); display: flex; align-items: center; padding: 0 26px; gap: 14px; }
+.topbar .title { font-size: var(--fs-h3); font-weight: 600; }
+.topbar .right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.winc { display: flex; gap: 8px; }
+.winc span { width: 11px; height: 11px; border-radius: 50%; border: var(--hairline); }
+.winc span:nth-child(1){ background:#f6bd60; } .winc span:nth-child(2){ background:#84a598; } .winc span:nth-child(3){ background:#c76468; }
+.content { flex: 1; overflow-y: auto; padding: 30px 34px 60px; }
+.page-enter { animation: pageEnter .55s var(--ease); }
+@keyframes pageEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* ————— 页头 ————— */
+.page-head { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 6px; }
+.page-head h1 { font-size: var(--fs-h1); font-weight: 600; }
+.page-head .sub { color: var(--text-2); font-size: var(--fs-small); margin-bottom: 6px; margin-left: auto; }
+.market-tabs { display: flex; gap: 4px; margin: 18px 0 22px; border-bottom: var(--hairline-soft); }
+.tab { font: inherit; font-size: var(--fs-small); color: var(--text-2); background: none; border: none; padding: 8px 16px; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all var(--dur) var(--ease); }
+.tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--sky); }
+
+/* ————— 插件卡片 ————— */
+.plugin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.plugin-card { border: var(--hairline); border-radius: var(--r-card); background: #fff; padding: 20px 20px 16px;
+  display: flex; flex-direction: column; gap: 10px; transition: border-color var(--dur) var(--ease); }
+.plugin-card:hover { border-color: var(--sky); }
+.plugin-card.installed { background: linear-gradient(0deg, var(--ok-t), #fff 40%); }
+.plugin-card .row1 { display: flex; align-items: center; gap: 12px; }
+.plugin-icon { width: 44px; height: 44px; flex: none; border-radius: var(--r-lg); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.t-sky { background: var(--sky-t); } .t-mint { background: var(--mint-t); } .t-pink { background: var(--pink-t); } .t-powder { background: var(--powder-t); } .t-warn { background: var(--warn-t); }
+.plugin-name { font-size: var(--fs-h3); font-weight: 600; }
+.plugin-ver { font-size: var(--fs-tiny); color: var(--text-3); }
+.plugin-desc { color: var(--text-2); font-size: var(--fs-small); line-height: 1.8; flex: 1; }
+.plugin-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: var(--fs-tiny); color: var(--text-2); background: var(--faint-bg); border-radius: var(--r-full); padding: 2px 10px; }
+.tag.role { background: var(--warn-t); color: var(--warn); }
+.tag.size { color: var(--text-3); }
+.plugin-foot { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.plugin-foot .state { font-size: var(--fs-small); color: var(--ok); display: flex; align-items: center; gap: 5px; }
+.plugin-foot .grow { flex: 1; }
+.progress { height: 4px; border-radius: var(--r-full); background: var(--faint-bg); overflow: hidden; margin-top: 2px; }
+.progress i { display: block; height: 100%; background: var(--sky); width: 0%; transition: width .25s linear; }
+.empty-tip { text-align: center; color: var(--text-3); padding: 48px 0; font-size: var(--fs-small); }
+
+/* ————— 控制面板演示页 ————— */
+.gd-hero { border: var(--hairline); border-radius: var(--r-card); background: #fff; padding: 26px 28px; margin-bottom: 20px; }
+.gd-hero h2 { font-size: var(--fs-h2); margin-bottom: 8px; }
+.gd-hero p { color: var(--text-2); line-height: 1.9; font-size: var(--fs-small); }
+.discover-card { border: 1px dashed var(--sky); border-radius: var(--r-card); background: var(--sky-t); padding: 22px 26px;
+  display: flex; align-items: center; gap: 18px; cursor: pointer; transition: all var(--dur) var(--ease); }
+.discover-card:hover { background: rgba(100,181,246,.2); }
+.discover-card .big { font-size: 30px; }
+.discover-card .t { font-weight: 600; }
+.discover-card .d { color: var(--text-2); font-size: var(--fs-small); margin-top: 4px; }
+.discover-card .arrow { margin-left: auto; color: var(--sky); font-size: 20px; }
+
+/* ————— 弹窗（首启引导） ————— */
+.overlay { position: fixed; inset: 0; background: rgba(74,85,104,.32); backdrop-filter: blur(2px); z-index: 200;
+  display: flex; align-items: center; justify-content: center; animation: fadeIn .4s var(--ease); }
+@keyframes fadeIn { from { opacity: 0; } }
+.modal { width: 560px; max-width: calc(100vw - 48px); background: var(--rice); border: var(--hairline); border-radius: var(--r-card);
+  padding: 28px 30px; animation: modalIn .5s var(--ease); max-height: 84vh; overflow-y: auto; }
+@keyframes modalIn { from { opacity: 0; transform: translateY(16px) scale(.98); } }
+.modal h3 { font-size: var(--fs-h2); margin-bottom: 6px; }
+.modal .hint { color: var(--text-2); font-size: var(--fs-small); line-height: 1.8; margin-bottom: 18px; }
+.pick-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.pick { display: flex; align-items: center; gap: 12px; border: var(--hairline); border-radius: var(--r-lg); background: #fff;
+  padding: 12px 14px; cursor: pointer; transition: all var(--dur) var(--ease); }
+.pick:hover { border-color: var(--sky); }
+.pick.on { border-color: var(--sky); background: var(--sky-t); }
+.pick input { accent-color: var(--sky); width: 16px; height: 16px; }
+.pick .pi { width: 34px; height: 34px; flex: none; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.pick .pn { font-weight: 600; }
+.pick .pd { font-size: var(--fs-tiny); color: var(--text-3); margin-top: 2px; }
+.pick .cnt { margin-left: auto; font-size: var(--fs-tiny); color: var(--text-3); }
+.modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
+/* ————— toast ————— */
+#toasts { position: fixed; top: 18px; right: 18px; z-index: 400; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: #fff; border: var(--hairline); border-left: 3px solid var(--ok); border-radius: var(--r-md);
+  padding: 10px 16px; font-size: var(--fs-small); animation: toastIn .45s var(--ease); box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+.toast.info { border-left-color: var(--sky); }
+.toast.err { border-left-color: var(--danger); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } }
+</style>
+</head>
+<body>
+
+<div class="demo-wrap">
+  <!-- ======== 侧栏 ======== -->
+  <nav class="sidebar">
+    <div class="brand"><div class="logo">途变</div><div class="tagline">知道你在改变</div></div>
+    <div class="nav-user">
+      <div class="name">演示用户</div>
+      <div class="meta">demo · 学生</div>
+    </div>
+    <div class="nav-group" id="navGroup"><!-- JS 渲染 --></div>
+    <div class="footer" id="navFooter">
+      <div class="ver">v2.2 · Tauri</div>
+      <button class="btn sm block guild-btn" id="guildBtn" style="display:none" onclick="go('market')">⚔ 冒险公会</button>
+      <button class="btn sm block">退出登录</button>
+    </div>
+  </nav>
+
+  <!-- ======== 主区 ======== -->
+  <div class="main">
+    <div class="topbar">
+      <div class="title" id="pageTitle">插件市场</div>
+      <div class="right">
+        <span style="font-size:var(--fs-tiny);color:var(--text-3)" id="roleHint">角色：学生</span>
+        <div class="winc"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+    <div class="content" id="content"><!-- JS 渲染 --></div>
+  </div>
+</div>
+
+<!-- 首启引导 -->
+<div class="overlay" id="onboardOverlay" style="display:none">
+  <div class="modal">
+    <h3>选择你要的功能</h3>
+    <div class="hint">途变客户端采用插件化设计，核心只保留四个板块。勾选需要的功能插件，安装后即可在侧栏使用；之后随时可以在「插件市场」里安装或卸载。</div>
+    <div class="pick-list" id="pickList"><!-- JS 渲染 --></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeOnboard()">稍后再说</button>
+      <button class="btn primary" id="onboardInstallBtn" onclick="installPicked()">安装所选（0）</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<div class="mock-banner">
+  <b>交互样例</b> 点击卡片按钮模拟安装/卸载，观察侧栏变化；
+  <span class="spacer"></span>
+  <button class="mock-btn" onclick="openOnboard()">重看首启引导</button>
+  <button class="mock-btn" onclick="switchRole()">切换 学生/教师 角色</button>
+</div>
+
+<script>
+/* ============ 样例数据（与正式实现同构） ============ */
+const ICONS = {
+  dashboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>',
+  exams: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9.5 8h5M9.5 12h5M9.5 16h3"/></svg>',
+  mybank: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h7M8 11h7"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.5-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.5 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.5 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.5-2-1.5c.07-.4.1-.8.1-1.2z"/></svg>',
+  market: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 8h16l-1.2 11a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8L4 8z"/><path d="M8.5 8a3.5 3.5 0 0 1 7 0"/></svg>',
+};
+const PLUGIN_ICONS = {
+  'study-records': '📓', 'knowledge': '🌳', 'offline-bank': '📦', 'teaching-tools': '🧰', 'guild': '⚔️',
+};
+
+/* 核心菜单（常驻） */
+const CORE_MENU = [
+  { page: 'dashboard', title: '控制面板', icon: 'dashboard' },
+  { page: 'exams', title: '真题市场', icon: 'exams' },
+  { page: 'mybank', title: '我的题库', icon: 'mybank' },
+  { page: 'settings', title: '个人设置', icon: 'settings' },
+];
+
+/* 插件目录（与服务端 catalog 同构） */
+const CATALOG = [
+  { id: 'study-records', name: '学习记录', icon: 'study-records', tint: 't-sky', ver: '1.0.0', size: '86 KB',
+    desc: '进行中考试、历史成绩与错题本：追踪每一场考试的进度，回顾成绩曲线，重刷错题查漏补缺。',
+    menus: [ { page:'in_progress', title:'进行中考试' }, { page:'history', title:'历史成绩' }, { page:'wrongbook', title:'错题本' } ],
+    roles: null },
+  { id: 'knowledge', name: '知识树', icon: 'knowledge', tint: 't-mint', ver: '1.0.0', size: '112 KB',
+    desc: '按科目构建知识点树，挂接错题与笔记，学习脉络一目了然，支持离线缓存与导出分享。',
+    menus: [ { page:'knowledge', title:'知识树' } ],
+    roles: null },
+  { id: 'offline-bank', name: '本地题库', icon: 'offline-bank', tint: 't-powder', ver: '1.0.0', size: '64 KB',
+    desc: '把试卷缓存到本地，无网也能刷题与即时判分，适合通勤、宿舍断网等场景。',
+    menus: [ { page:'offline', title:'本地题库' } ],
+    roles: null },
+  { id: 'teaching-tools', name: '教学工具', icon: 'teaching-tools', tint: 't-warn', ver: '1.0.0', size: '156 KB',
+    desc: '面向教师：题库管理与真题上传，支持 Excel 批量导入、试卷包导入导出。',
+    menus: [ { page:'questionbank', title:'题库管理' }, { page:'upload', title:'真题上传' } ],
+    roles: ['teacher', 'admin'] },
+  { id: 'guild', name: '冒险公会', icon: 'guild', tint: 't-pink', ver: '1.0.0', size: '284 KB',
+    desc: '任务悬赏、见闻手札、学习小队与冒险者成长体系——把学习变成一场冒险。',
+    menus: [ ], footerButton: '⚔ 冒险公会',
+    roles: null },
+];
+
+let installed = { };          // id -> true（演示：默认空白起步）
+let role = 'student';
+let curTab = 'all';
+let curPage = 'market';
+
+/* ============ 渲染：侧栏 ============ */
+function renderNav() {
+  const g = document.getElementById('navGroup');
+  g.innerHTML = '';
+  const mk = (m, cls) => {
+    const b = document.createElement('button');
+    b.className = 'nav-item ' + (cls || '') + (curPage === m.page ? ' active' : '');
+    b.innerHTML = (ICONS[m.icon] || '') + m.title;
+    b.onclick = () => go(m.page === 'market' ? 'market' : m.page);
+    g.appendChild(b);
+  };
+  mk(CORE_MENU[0]); mk(CORE_MENU[1]); mk(CORE_MENU[2]);
+  // 已装插件的菜单（按目录顺序插入在“我的题库”与“个人设置”之间）
+  let any = false;
+  for (const p of CATALOG) {
+    if (!installed[p.id] || !p.menus.length) continue;
+    if (!any) { const s = document.createElement('div'); s.className = 'nav-sep'; s.textContent = '插件'; g.appendChild(s); any = true; }
+    for (const m of p.menus) {
+      const b = document.createElement('button');
+      b.className = 'nav-item plugin-item enter-anim' + (curPage === m.page ? ' active' : '');
+      b.textContent = m.title; b.onclick = () => toast('（演示）插件页面：' + m.title, 'info');
+      g.appendChild(b);
+    }
+  }
+  // 插件市场入口（常驻，靠下）
+  const s2 = document.createElement('div'); s2.className = 'nav-sep'; s2.textContent = '扩展'; g.appendChild(s2);
+  mk({ page: 'market', title: '插件市场', icon: 'market' });
+  mk(CORE_MENU[3]);
+  // 公会底部按钮
+  document.getElementById('guildBtn').style.display = installed['guild'] ? '' : 'none';
+}
+
+/* ============ 渲染：市场页 ============ */
+function renderMarket() {
+  const c = document.getElementById('content');
+  const list = CATALOG.filter(p => curTab === 'all' || (curTab === 'installed') === !!installed[p.id]);
+  c.innerHTML = `
+    <div class="page-enter">
+      <div class="page-head">
+        <h1>插件市场</h1>
+        <div class="sub">已安装 ${Object.keys(installed).length} / ${CATALOG.length} · 空白起步，按需安装</div>
+      </div>
+      <div class="market-tabs">
+        ${['all','installed','available'].map(t => `<button class="tab ${curTab===t?'active':''}" onclick="setTab('${t}')">${
+          t==='all'?'全部':t==='installed'?'已安装':'未安装'}</button>`).join('')}
+      </div>
+      <div class="plugin-grid" id="grid"></div>
+    </div>`;
+  const grid = c.querySelector('#grid');
+  if (!list.length) { grid.innerHTML = '<div class="empty-tip" style="grid-column:1/-1">这里空空如也</div>'; return; }
+  for (const p of list) grid.appendChild(cardEl(p));
+}
+
+function cardEl(p) {
+  const d = document.createElement('div');
+  d.className = 'plugin-card' + (installed[p.id] ? ' installed' : '');
+  d.innerHTML = `
+    <div class="row1">
+      <div class="plugin-icon ${p.tint}">${PLUGIN_ICONS[p.icon]}</div>
+      <div>
+        <div class="plugin-name">${p.name}</div>
+        <div class="plugin-ver">v${p.ver} · ${p.size}</div>
+      </div>
+    </div>
+    <div class="plugin-desc">${p.desc}</div>
+    <div class="plugin-tags">
+      ${p.roles ? '<span class="tag role">教师专用</span>' : ''}
+      <span class="tag">${p.menus.length ? p.menus.map(m=>m.title).join(' / ') : '独立入口'}</span>
+      <span class="tag size">${p.id}</span>
+    </div>
+    <div class="plugin-foot">
+      <span class="foot-l" style="flex:1">
+        <span class="state" style="display:${installed[p.id]?'':'none'}">✓ 已安装</span>
+        <div class="progress" style="display:none"><i></i></div>
+      </span>
+      ${footButtons(p)}
+    </div>`;
+  return d;
+}
+
+function footButtons(p) {
+  const roleBlocked = p.roles && !p.roles.includes(role);
+  if (roleBlocked) return `<button class="btn sm" disabled>仅教师可用</button>`;
+  if (!installed[p.id]) return `<button class="btn sm primary" onclick="install('${p.id}',this)">安装</button>`;
+  return `<button class="btn sm ghost-danger" onclick="uninstall('${p.id}')">卸载</button>`;
+}
+
+/* ============ 交互：安装 / 卸载 ============ */
+function install(id, btn, silent) {
+  const card = btn ? btn.closest('.plugin-card') : null;
+  const bar = card?.querySelector('.progress');
+  const state = card?.querySelector('.state');
+  if (btn) { btn.disabled = true; btn.textContent = '安装中…'; if (bar) bar.style.display = ''; }
+  let v = 0;
+  const t = setInterval(() => {
+    v += 12 + Math.random() * 18;
+    if (bar) bar.querySelector('i').style.width = Math.min(v, 100) + '%';
+    if (v >= 100) {
+      clearInterval(t);
+      installed[id] = true;
+      renderNav();
+      if (curPage === 'market') renderMarket();
+      const p = CATALOG.find(x => x.id === id);
+      toast(`「${p.name}」已安装` + (p.menus.length ? `，侧栏新增 ${p.menus.length} 个入口` : ''), 'ok');
+    }
+  }, 180);
+}
+function uninstall(id) {
+  delete installed[id];
+  renderNav();
+  if (curPage === 'market') renderMarket();
+  const p = CATALOG.find(x => x.id === id);
+  toast(`「${p.name}」已卸载，本地缓存保留`, 'info');
+}
+function setTab(t) { curTab = t; renderMarket(); }
+
+/* ============ 首启引导 ============ */
+function openOnboard() {
+  const list = document.getElementById('pickList');
+  list.innerHTML = '';
+  for (const p of CATALOG) {
+    if (p.roles && !p.roles.includes(role)) continue;
+    const l = document.createElement('label');
+    l.className = 'pick';
+    l.innerHTML = `
+      <input type="checkbox" data-id="${p.id}" onchange="syncPickBtn()">
+      <div class="pi ${p.tint}">${PLUGIN_ICONS[p.icon]}</div>
+      <div><div class="pn">${p.name}</div><div class="pd">${p.desc.split('：')[0].split('，')[0]}</div></div>
+      <div class="cnt">${p.size}</div>`;
+    list.appendChild(l);
+  }
+  syncPickBtn();
+  document.getElementById('onboardOverlay').style.display = '';
+}
+function closeOnboard() { document.getElementById('onboardOverlay').style.display = 'none'; }
+function syncPickBtn() {
+  const n = document.querySelectorAll('#pickList input:checked').length;
+  const b = document.getElementById('onboardInstallBtn');
+  b.textContent = `安装所选（${n}）`; b.disabled = n === 0;
+}
+function installPicked() {
+  const ids = [...document.querySelectorAll('#pickList input:checked')].map(i => i.dataset.id);
+  closeOnboard();
+  ids.forEach((id, i) => setTimeout(() => install(id, null), i * 500));
+}
+
+/* ============ 页面切换 / 杂项 ============ */
+function go(page) {
+  curPage = page;
+  document.getElementById('pageTitle').textContent = page === 'market' ? '插件市场' : '控制面板';
+  renderNav();
+  const c = document.getElementById('content');
+  if (page === 'market') { renderMarket(); return; }
+  // 控制面板演示页：四板块 + 发现更多引导卡
+  const un = CATALOG.filter(p => !installed[p.id] && (!p.roles || p.roles.includes(role))).length;
+  c.innerHTML = `
+    <div class="page-enter">
+      <div class="gd-hero">
+        <h2>下午好，演示用户</h2>
+        <p>核心四板块始终可用。当前已安装 ${Object.keys(installed).length} 个插件${un ? `，还有 ${un} 个功能等你发现。` : '，全部功能已就位。'}</p>
+      </div>
+      <div class="discover-card" onclick="go('market')">
+        <div class="big">🧩</div>
+        <div><div class="t">插件市场 · 发现更多功能</div>
+        <div class="d">知识树、学习记录、本地题库、冒险公会……按需安装，不用不装</div></div>
+        <div class="arrow">→</div>
+      </div>
+    </div>`;
+}
+function switchRole() {
+  role = role === 'student' ? 'teacher' : 'student';
+  document.getElementById('roleHint').textContent = '角色：' + (role === 'student' ? '学生' : '教师');
+  if (role === 'student') for (const p of CATALOG) if (p.roles) delete installed[p.id];
+  renderNav(); if (curPage === 'market') renderMarket();
+  toast('已切换为' + (role === 'student' ? '学生（教学工具已隐藏）' : '教师（可见教学工具）'), 'info');
+}
+function toast(msg, kind) {
+  const d = document.createElement('div');
+  d.className = 'toast ' + (kind || 'ok'); d.textContent = msg;
+  document.getElementById('toasts').appendChild(d);
+  setTimeout(() => { d.style.opacity = '0'; d.style.transition = 'opacity .5s'; setTimeout(() => d.remove(), 500); }, 2600);
+}
+
+/* 启动：侧栏 + 市场页 + 首启引导 */
+renderNav(); renderMarket();
+setTimeout(openOnboard, 600);
+</script>
+</body>
+</html>

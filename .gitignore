@@ -1,0 +1,22 @@
+# ---- Rust / Tauri 构建产物 ----
+/target/
+tauri/src-tauri/target/
+tauri/node_modules/
+
+# ---- Android 工程生成物（tauri android init 生成；含签名配置，切勿入库）----
+tauri/src-tauri/gen/
+keystore.properties
+*.keystore
+*.jks
+
+# ---- 发布产物 ----
+/dist/
+/dist_prepare/
+*.apk
+*.zip
+!themes/*.dtheme
+
+# ---- 系统文件 ----
+Thumbs.db
+Desktop.ini
+.DS_Store

@@ -1,0 +1,673 @@
+/* ============================================================
+   仿真模拟考试 exam-sim.css（桌面客户端）
+   A3 纸质小册 + 拟物答题卡/草稿纸 + 翻页动画
+   注意：SPA 常驻样式表，所有规则圈在 .sim-root 作用域内
+   ============================================================ */
+
+.sim-root{
+  position:fixed;inset:0;z-index:100;overflow:hidden;
+  background:#14100c;
+  font-family:"Songti SC","SimSun","Noto Serif SC","Source Han Serif SC",serif;
+  -webkit-font-smoothing:antialiased;
+  user-select:none;
+}
+
+/* ================= 顶栏（拖动区 + 窗口控制） ================= */
+.sim-topbar{
+  position:absolute;top:0;left:0;right:0;z-index:80;
+  display:flex;align-items:center;gap:10px;
+  height:38px;padding:0 6px 0 14px;
+  background:linear-gradient(#241a10,#1a1208);
+  border-bottom:1px solid rgba(226,196,146,.22);
+  color:#c9b391;
+}
+.sim-topbar .sim-title{
+  flex:1;font-size:12.5px;letter-spacing:1px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.75;
+}
+
+/* ================= 桌面 ================= */
+.sim-root .desk{
+  position:absolute;inset:0;z-index:1;
+  background:
+    radial-gradient(ellipse 78% 58% at 50% 20%, rgba(255,214,158,.15), transparent 68%),
+    radial-gradient(ellipse 130% 62% at 50% 112%, rgba(0,0,0,.58), transparent 62%),
+    repeating-linear-gradient(88deg, rgba(0,0,0,.055) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(92.5deg, rgba(0,0,0,.04) 0 2px, transparent 2px 19px),
+    repeating-linear-gradient(85deg, rgba(255,255,255,.016) 0 3px, transparent 3px 27px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.03) 0 1px, transparent 1px 43px),
+    linear-gradient(170deg,#6f4d2c 0%,#5b3d20 38%,#42301a 72%,#2c1f13 100%);
+}
+.sim-root .desk::after{
+  content:'';position:absolute;inset:0;opacity:.5;
+  background:
+    linear-gradient(102deg, transparent 48%, rgba(255,255,255,.035) 49%, transparent 50%),
+    linear-gradient(78deg, transparent 62%, rgba(0,0,0,.10) 63%, transparent 64%),
+    linear-gradient(95deg, transparent 22%, rgba(0,0,0,.08) 23%, transparent 23.6%);
+}
+
+/* ================= 舞台 ================= */
+.sim-root .stage{
+  position:absolute;inset:0;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  perspective:2000px;
+  perspective-origin:50% 40%;
+}
+.sim-root .paper-3d{
+  transform:rotateX(13deg) rotateZ(-0.4deg);
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.sim-root .paper-scaler{
+  transform:scale(var(--s,1));
+  transform-origin:50% 50%;
+}
+
+/* ================= A3 对开小册 ================= */
+.sim-root .book{position:relative;}
+.sim-root .paper{
+  position:relative;
+  width:1240px;height:877px;
+  display:none;
+  grid-template-columns:1fr 1fr;
+  color:#181818;
+  font-size:14.5px;
+  line-height:1.75;
+  background-color:#fbf9f0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  box-shadow:
+    0 0 0 1px rgba(120,100,70,.18),
+    0 1px 0 rgba(255,255,255,.7) inset,
+    0 3px 7px rgba(0,0,0,.30),
+    0 20px 38px rgba(0,0,0,.44),
+    0 48px 78px rgba(0,0,0,.38),
+    0 90px 120px rgba(0,0,0,.30);
+}
+.sim-root .paper.active{display:grid;animation:spreadIn .32s ease;}
+@keyframes spreadIn{
+  from{opacity:.25;transform:translateX(26px);}
+  to{opacity:1;transform:translateX(0);}
+}
+.sim-root .paper.no-anim{animation:none!important;}
+
+/* ================= 翻页动画 ================= */
+.sim-root .flip-cover{
+  position:absolute;top:0;height:100%;width:50%;z-index:7;
+  pointer-events:none;overflow:hidden;
+  background-color:#fbf9f0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+}
+.sim-root .flip-cover.fwd{left:0;}
+.sim-root .flip-cover.bwd{left:50%;}
+.sim-root .flip-cover .page{height:100%;}
+.sim-root .flip-leaf{
+  position:absolute;top:0;height:100%;width:50%;z-index:8;
+  perspective:1900px;pointer-events:none;
+}
+.sim-root .flip-leaf.fwd{left:50%;}
+.sim-root .flip-leaf.bwd{left:0;}
+.sim-root .flip-paper{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.sim-root .flip-leaf.fwd .flip-paper{transform-origin:left center;}
+.sim-root .flip-leaf.bwd .flip-paper{transform-origin:right center;}
+.sim-root .flip-face{
+  position:absolute;inset:0;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  overflow:hidden;
+  background-color:#fbf9f0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+}
+.sim-root .flip-face .page{height:100%;}
+.sim-root .flip-face.flip-back{transform:rotateY(180deg);}
+.sim-root .flip-face::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,
+    rgba(0,0,0,.13), rgba(0,0,0,0) 11%,
+    rgba(0,0,0,0) 89%, rgba(0,0,0,.13));
+}
+.sim-root .flip-cast{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:46%;height:100%;z-index:6;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,
+    rgba(0,0,0,0) 0%, rgba(0,0,0,.24) 40%,
+    rgba(0,0,0,.30) 50%, rgba(0,0,0,.24) 60%, rgba(0,0,0,0) 100%);
+}
+@keyframes simFlipFwd{
+  0%{transform:rotateY(0deg);}
+  50%{transform:rotateY(-92deg) scale(1.012);}
+  100%{transform:rotateY(-180deg);}
+}
+@keyframes simFlipBwd{
+  0%{transform:rotateY(0deg);}
+  50%{transform:rotateY(92deg) scale(1.012);}
+  100%{transform:rotateY(180deg);}
+}
+@keyframes simFlipCast{
+  0%{opacity:0;}
+  28%{opacity:.9;}
+  100%{opacity:0;}
+}
+
+/* 中缝折痕 / 纸面光泽 */
+.sim-root .paper::before{
+  content:'';
+  position:absolute;left:50%;top:0;bottom:0;
+  width:34px;transform:translateX(-50%);
+  pointer-events:none;z-index:5;
+  background:linear-gradient(90deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,.035) 28%,
+    rgba(0,0,0,.10) 46%,
+    rgba(0,0,0,.155) 50%,
+    rgba(0,0,0,.10) 54%,
+    rgba(0,0,0,.035) 72%,
+    rgba(0,0,0,0) 100%);
+}
+.sim-root .paper::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:linear-gradient(198deg,
+    rgba(255,255,255,.30) 0%,
+    transparent 20%,
+    transparent 74%,
+    rgba(0,0,0,.05) 100%);
+}
+
+/* 单页 */
+.sim-root .page{
+  padding:46px 40px 34px;
+  display:flex;flex-direction:column;
+  position:relative;z-index:2;
+  overflow:hidden;
+}
+.sim-root .page-left { padding-left:60px;  padding-right:40px; }
+.sim-root .page-right{ padding-left:40px;  padding-right:60px; }
+.sim-root .page-footer{
+  margin-top:auto;padding-top:14px;
+  text-align:center;font-size:11px;color:#9a9484;letter-spacing:3px;
+  flex-shrink:0;
+}
+
+/* 卷头 */
+.sim-root .p-title{text-align:center;font-size:15px;font-weight:700;letter-spacing:1.5px;color:#111;}
+.sim-root .p-subject{
+  text-align:center;font-size:27px;font-weight:700;
+  letter-spacing:11px;margin:4px 0 3px 11px;color:#0d0d0d;
+}
+.sim-root .p-meta{text-align:center;font-size:12px;color:#333;letter-spacing:.5px;}
+.sim-root .info-line{
+  display:flex;justify-content:center;gap:26px;
+  font-size:13.5px;margin:14px 0 12px;color:#222;
+}
+.sim-root .info-line .u{
+  display:inline-block;min-width:92px;border-bottom:1px solid #3a3a3a;
+  height:1.1em;text-align:center;color:#16234a;
+  font-family:"Kaiti SC","KaiTi","STKaiti","楷体",cursive;font-size:15px;
+}
+.sim-root .notice{
+  border:1px solid #b5ae7c;
+  background:rgba(255,255,255,.42);
+  padding:7px 12px 8px;
+  font-size:12px;line-height:1.66;color:#333;
+}
+.sim-root .notice b{font-weight:700;}
+.sim-root .rule{height:0;border-top:2px solid #2a2a2a;margin:14px 0 3px;}
+.sim-root .rule.thin{border-top:1px solid #2a2a2a;margin:0 0 12px;}
+.sim-root .sec-title{
+  font-weight:700;font-size:13.5px;line-height:1.7;
+  padding:6px 0 8px;color:#111;text-align:justify;
+}
+
+/* 题目块 */
+.sim-root .q{position:relative;padding:2px 26px 12px 0;}
+.sim-root .q-text{text-align:justify;}
+.sim-root .q-no{font-weight:700;margin-right:2px;}
+.sim-root .q-text i{font-style:italic;font-family:"Times New Roman",serif;}
+.sim-root .q-text .katex{font-size:1.02em;}
+.sim-root .q-text img{max-width:100%;}
+.sim-root .q-mark{
+  position:absolute;top:0;right:0;
+  width:22px;height:22px;line-height:20px;text-align:center;
+  border:none;background:transparent;cursor:pointer;
+  color:#c9c2ad;font-size:15px;padding:0;
+  transition:color .15s,transform .15s;
+}
+.sim-root .q-mark:hover{color:#8a8060;transform:scale(1.15);}
+.sim-root .q.marked .q-mark{color:#c23a2f;}
+
+.sim-root .answer-slot{
+  display:inline-block;min-width:24px;text-align:center;
+  font-family:"Kaiti SC","KaiTi","STKaiti","楷体",cursive;
+  font-size:16px;font-weight:700;color:#1b2c52;line-height:1;
+  transform:translateY(-1px);
+}
+.sim-root .answer-slot.filled{color:#16234a;}
+.sim-root .opts{display:flex;flex-wrap:wrap;padding-left:26px;margin-top:2px;}
+.sim-root .opt{
+  width:50%;padding:1px 6px 1px 4px;border-radius:3px;
+  cursor:pointer;position:relative;font-size:13.5px;line-height:1.62;
+  transition:background .13s,color .13s;
+}
+.sim-root .opt:hover{background:rgba(255,226,120,.45);}
+.sim-root .opt.chosen{color:#16234a;font-weight:700;}
+.sim-root .opt.chosen::before{
+  content:'✓';position:absolute;left:-15px;top:1px;
+  font-size:12px;color:#3a5a9a;opacity:.9;
+  font-family:"Kaiti SC","KaiTi",cursive;
+}
+.sim-root .opt .opt-img{max-width:100%;display:block;margin-top:2px;}
+.sim-root .q.locate .q-text, .sim-root .q.locate .opts{animation:simLocateFlash 1.6s ease;}
+@keyframes simLocateFlash{
+  0%{background:rgba(255,214,110,.65);}
+  100%{background:transparent;}
+}
+
+/* 填空 / 书写区 */
+.sim-root .blank{
+  display:inline-block;min-width:120px;
+  border-bottom:1px solid #1a1a1a;
+  text-align:center;outline:none;
+  font-family:"Kaiti SC","KaiTi","STKaiti","楷体",cursive;
+  font-size:16px;color:#16234a;
+  line-height:1.3;padding:0 6px;margin:0 2px;
+  user-select:text;caret-color:#2a4a8a;
+  transition:background .15s;
+}
+.sim-root .blank:focus{background:rgba(255,235,150,.42);}
+.sim-root .solve-label{
+  font-family:"Kaiti SC","KaiTi","STKaiti",cursive;
+  font-size:16px;color:#2a2a2a;margin:6px 0 2px;
+}
+.sim-root .write-lines{
+  --lh:28px;
+  height:calc(var(--lh) * var(--n,12));
+  background-image:repeating-linear-gradient(to bottom,
+    transparent 0,
+    transparent calc(var(--lh) - 1px),
+    rgba(120,118,108,.42) calc(var(--lh) - 1px),
+    rgba(120,118,108,.42) var(--lh));
+  line-height:var(--lh);
+  font-family:"Kaiti SC","KaiTi","STKaiti","楷体",cursive;
+  font-size:16px;
+  color:#16234a;
+  padding:0 4px;
+  outline:none;
+  caret-color:#2a4a8a;
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:break-word;
+  user-select:text;
+  overflow-y:auto;
+  border-radius:2px;
+  transition:background-color .15s;
+}
+.sim-root .write-lines:focus{background-color:rgba(255,240,180,.20);}
+.sim-root .subq{padding-left:22px;margin-top:8px;}
+.sim-root .subq-text{text-align:justify;}
+.sim-root .subq .opts{padding-left:20px;}
+.sim-root .paper-end{
+  margin:auto;text-align:center;color:#9a9484;
+  font-size:13px;letter-spacing:6px;
+}
+
+/* 笔 / 暗角 */
+.sim-root .pen{
+  position:absolute;right:-64px;bottom:-42px;
+  width:300px;height:48px;
+  transform:rotate(-24deg);
+  filter:drop-shadow(0 14px 12px rgba(0,0,0,.55));
+  pointer-events:none;z-index:6;
+}
+.sim-root .vignette{
+  position:absolute;inset:0;z-index:40;pointer-events:none;
+  background:radial-gradient(ellipse 82% 72% at 50% 46%,
+    transparent 34%, rgba(0,0,0,.32) 76%, rgba(0,0,0,.58) 100%);
+}
+
+/* HUD */
+.sim-root .clock-ui{
+  position:absolute;top:50px;right:24px;z-index:50;
+  text-align:right;pointer-events:none;
+  color:#f0dfc0;text-shadow:0 2px 10px rgba(0,0,0,.9);
+}
+.sim-root .clock-label{font-size:11.5px;letter-spacing:3px;opacity:.5;}
+.sim-root .clock-time{
+  font-size:34px;font-weight:700;letter-spacing:1px;
+  font-family:"DIN Alternate","Menlo","Consolas",monospace;
+  line-height:1.1;
+}
+.sim-root .clock-time.warn{color:#ff5646;animation:simBlink 1.05s infinite;}
+@keyframes simBlink{50%{opacity:.35;}}
+.sim-root .progress-ui{
+  position:absolute;top:126px;right:24px;z-index:50;
+  font-size:12.5px;color:#c9b391;letter-spacing:1px;
+  text-shadow:0 2px 8px rgba(0,0,0,.9);pointer-events:none;
+}
+.sim-root .progress-ui b{color:#f0dcb4;font-size:15px;font-family:"Menlo",monospace;}
+.sim-root .hud-btns{
+  position:absolute;top:156px;right:24px;z-index:50;
+  display:flex;flex-direction:column;gap:8px;
+}
+.sim-root .hud-btn{
+  padding:7px 16px;
+  font-family:"Songti SC","SimSun",serif;
+  font-size:13px;letter-spacing:3px;text-indent:3px;
+  color:#e9d6b2;
+  background:linear-gradient(#3d2c1b,#251809);
+  border:1px solid rgba(226,196,146,.35);
+  border-radius:4px;cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.09) inset;
+  transition:all .18s;
+}
+.sim-root .hud-btn:hover,.sim-root .hud-btn.on{
+  background:linear-gradient(#4e3923,#32200d);
+  border-color:rgba(240,215,170,.6);
+  transform:translateY(-1px);
+}
+.sim-root .hud-btn.on{color:#ffd98a;}
+
+/* 翻页导航 / 交卷 */
+.sim-root .book-nav{
+  position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:50;display:flex;align-items:center;gap:14px;
+}
+.sim-root .nav-btn{
+  width:38px;height:38px;border-radius:50%;
+  font-size:17px;line-height:1;color:#e9d6b2;
+  background:linear-gradient(#3d2c1b,#251809);
+  border:1px solid rgba(226,196,146,.35);cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.6);
+  transition:all .18s;
+}
+.sim-root .nav-btn:hover:not(:disabled){
+  background:linear-gradient(#4e3923,#32200d);
+  border-color:rgba(240,215,170,.6);
+}
+.sim-root .nav-btn:disabled{opacity:.28;cursor:default;}
+.sim-root .nav-info{
+  min-width:110px;text-align:center;
+  font-size:12.5px;color:#c9b391;letter-spacing:2px;
+  text-shadow:0 2px 8px rgba(0,0,0,.9);
+}
+.sim-root .nav-info b{color:#f0dcb4;font-family:"Menlo",monospace;font-size:14px;}
+.sim-root .submit-btn{
+  position:absolute;bottom:26px;right:28px;z-index:60;
+  padding:11px 30px;
+  font-family:"Songti SC","SimSun",serif;
+  font-size:15px;letter-spacing:5px;text-indent:5px;
+  color:#e9d6b2;
+  background:linear-gradient(#3d2c1b,#251809);
+  border:1px solid rgba(226,196,146,.35);
+  border-radius:4px;cursor:pointer;
+  box-shadow:0 8px 22px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.09) inset;
+  transition:all .18s;
+}
+.sim-root .submit-btn:hover{
+  background:linear-gradient(#4e3923,#32200d);
+  border-color:rgba(240,215,170,.6);
+  transform:translateY(-1px);
+}
+
+/* 警告横幅 */
+.sim-root .warn-banner{
+  position:absolute;top:44px;left:50%;transform:translateX(-50%);
+  z-index:90;display:none;align-items:center;gap:12px;
+  max-width:70vw;padding:9px 18px;
+  font-size:13.5px;letter-spacing:1px;color:#4a3010;
+  background:linear-gradient(#f7e9c4,#eeda9f);
+  border:1px solid rgba(160,120,40,.5);
+  border-radius:4px;
+  box-shadow:0 10px 30px rgba(0,0,0,.55);
+}
+.sim-root .warn-banner.danger{color:#7a1410;background:linear-gradient(#f6cdc4,#eeac9f);border-color:rgba(150,40,30,.55);}
+.sim-root .wb-close{
+  border:none;background:transparent;cursor:pointer;
+  font-size:13px;color:#7a6330;padding:2px 4px;
+}
+
+/* 答题卡 */
+.sim-root .anscard{
+  position:absolute;top:0;right:0;bottom:0;z-index:70;
+  width:318px;
+  background-color:#fbf8ef;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  box-shadow:-14px 0 44px rgba(0,0,0,.55);
+  transform:translateX(105%);
+  transition:transform .32s ease;
+  display:flex;flex-direction:column;
+  color:#222;
+}
+.sim-root .anscard.open{transform:translateX(0);}
+.sim-root .anscard::before{
+  content:'';position:absolute;left:34px;top:0;bottom:0;
+  width:2px;background:rgba(190,74,64,.55);pointer-events:none;
+}
+.sim-root .ac-head{
+  padding:18px 18px 10px 52px;
+  border-bottom:1px solid #d8d2c0;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.sim-root .ac-head h3{margin:0;font-size:16px;letter-spacing:6px;color:#111;font-weight:700;}
+.sim-root .ac-close{
+  border:none;background:transparent;font-size:16px;
+  color:#9a9484;cursor:pointer;padding:4px 8px;
+}
+.sim-root .ac-close:hover{color:#444;}
+.sim-root .ac-stats{
+  padding:10px 18px 8px 52px;font-size:12px;color:#55503f;
+  display:flex;gap:14px;flex-shrink:0;
+}
+.sim-root .ac-stats b{font-family:"Menlo",monospace;color:#16234a;font-size:13px;}
+.sim-root .ac-body{flex:1;overflow-y:auto;padding:6px 18px 12px 52px;}
+.sim-root .ac-group{margin-bottom:12px;}
+.sim-root .ac-group-title{font-size:12.5px;font-weight:700;color:#333;margin-bottom:7px;letter-spacing:.5px;}
+.sim-root .ac-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.sim-root .ac-cell{
+  width:34px;height:34px;border-radius:4px;
+  border:1px solid #b5ae9c;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-family:"Menlo",monospace;color:#4a4436;
+  cursor:pointer;position:relative;background:rgba(255,255,255,.5);
+  transition:all .13s;
+}
+.sim-root .ac-cell:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.18);}
+.sim-root .ac-cell.answered{background:#16234a;border-color:#16234a;color:#f4ecd8;font-weight:700;}
+.sim-root .ac-cell.marked::after{
+  content:'';position:absolute;top:-4px;right:-4px;
+  border-left:9px solid transparent;border-top:9px solid #c23a2f;
+  border-radius:1px;
+}
+.sim-root .ac-cell.current{outline:2px solid #b8860b;outline-offset:1px;}
+.sim-root .ac-legend{
+  padding:10px 18px 4px 52px;
+  display:flex;flex-wrap:wrap;gap:12px;
+  font-size:11px;color:#6b6450;flex-shrink:0;
+}
+.sim-root .lg{display:flex;align-items:center;gap:5px;}
+.sim-root .lg i{
+  width:14px;height:14px;border-radius:3px;border:1px solid #b5ae9c;
+  display:inline-block;background:rgba(255,255,255,.5);
+}
+.sim-root .lg i.answered{background:#16234a;border-color:#16234a;}
+.sim-root .lg i.marked{position:relative;}
+.sim-root .lg i.marked::after{
+  content:'';position:absolute;top:-3px;right:-3px;
+  border-left:7px solid transparent;border-top:7px solid #c23a2f;
+}
+.sim-root .lg i.current{outline:1.5px solid #b8860b;}
+.sim-root .ac-submit{
+  margin:10px 18px 16px 52px;flex-shrink:0;
+  padding:10px;background:linear-gradient(#2a1d10,#1a1108);
+  color:#e5d2ae;border:none;border-radius:4px;cursor:pointer;
+  font-family:inherit;font-size:14px;letter-spacing:4px;text-indent:4px;
+  transition:background .18s;
+}
+.sim-root .ac-submit:hover{background:linear-gradient(#3d2a16,#241809);}
+
+/* 草稿纸 */
+.sim-root .pad{
+  position:absolute;left:26px;top:80px;z-index:70;
+  width:452px;
+  transform:rotate(-.6deg);
+  background-color:#f6ecc4;
+  background-image:
+    linear-gradient(90deg, transparent 40px, rgba(200,80,70,.35) 40px, rgba(200,80,70,.35) 41px, transparent 41px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 27px, rgba(120,118,108,.35) 27px, rgba(120,118,108,.35) 28px);
+  box-shadow:0 4px 10px rgba(0,0,0,.35),0 22px 46px rgba(0,0,0,.45);
+  border-radius:2px;
+  transition:transform .3s ease;
+}
+.sim-root .pad.hidden{transform:translateX(-115%) rotate(-.6deg);}
+.sim-root .pad-head{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px 6px 52px;cursor:grab;
+  border-bottom:1px dashed rgba(120,110,80,.4);
+}
+.sim-root .pad-head:active{cursor:grabbing;}
+.sim-root .pad-title{
+  font-size:14px;font-weight:700;letter-spacing:4px;color:#4a4436;
+  margin-right:auto;
+}
+.sim-root .pad-tool{
+  width:26px;height:26px;border-radius:4px;
+  border:1px solid rgba(120,110,80,.35);
+  background:rgba(255,255,255,.45);
+  cursor:pointer;font-size:13px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  color:#4a4436;transition:all .13s;padding:0;
+}
+.sim-root .pad-tool:hover{background:rgba(255,255,255,.8);}
+.sim-root .pad-tool.sel{background:#16234a;color:#f4ecd8;border-color:#16234a;}
+.sim-root .pad-tool.danger:hover{background:#c23a2f;color:#fff;border-color:#c23a2f;}
+.sim-root .pad-swatch{width:14px;height:14px;border-radius:50%;display:block;}
+.sim-root .pad-sizes{display:flex;gap:4px;align-items:center;padding:0 2px;}
+.sim-root .pad-sizes .sz{
+  border:none;background:transparent;cursor:pointer;padding:3px;
+  display:flex;align-items:center;justify-content:center;
+}
+.sim-root .pad-sizes .sz i{background:#4a4436;border-radius:50%;display:block;}
+.sim-root .pad-sizes .sz.s i{width:4px;height:4px;}
+.sim-root .pad-sizes .sz.m i{width:7px;height:7px;}
+.sim-root .pad-sizes .sz.l i{width:11px;height:11px;}
+.sim-root .pad-sizes .sz.sel i{background:#16234a;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 0 3px #16234a;}
+.sim-root .pad canvas{display:block;width:100%;touch-action:none;cursor:crosshair;}
+.sim-root .pad-tip{padding:4px 10px 6px 52px;font-size:10.5px;color:#8a8060;letter-spacing:1px;}
+.sim-root .pad-tab{
+  position:absolute;left:0;top:200px;z-index:70;
+  writing-mode:vertical-rl;
+  padding:14px 7px;
+  background:linear-gradient(#e8dca6,#d9c983);
+  border:1px solid rgba(120,110,80,.4);border-left:none;
+  border-radius:0 6px 6px 0;
+  font-size:12.5px;letter-spacing:5px;color:#4a4436;
+  cursor:pointer;box-shadow:4px 4px 12px rgba(0,0,0,.3);
+  display:none;
+}
+.sim-root .pad-tab.show{display:block;}
+
+/* 弹窗（纸质卡） */
+.sim-root .overlay-m{
+  position:absolute;inset:0;z-index:100;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(4,3,2,.72);backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.sim-root .overlay-m.show{opacity:1;pointer-events:auto;}
+.sim-root .m-card{
+  width:400px;max-width:92%;padding:30px 34px 26px;
+  background:linear-gradient(#fbf8ef,#f1ece0);
+  border-radius:3px;color:#222;
+  box-shadow:0 30px 70px rgba(0,0,0,.75),0 0 0 1px rgba(120,100,70,.2);
+}
+.sim-root .m-card h3{
+  margin:0 0 6px;font-size:17px;letter-spacing:4px;text-indent:4px;
+  text-align:center;font-weight:700;
+}
+.sim-root .m-line{height:1px;background:#c9c2b0;margin:12px 0 14px;}
+.sim-root .m-body{font-size:13.5px;line-height:1.9;color:#333;}
+.sim-root .m-body .miss-list{color:#b03030;font-family:"Kaiti SC","KaiTi",cursive;}
+.sim-root .m-btns{margin-top:20px;display:flex;justify-content:center;gap:14px;}
+.sim-root .m-btn{
+  padding:9px 26px;border:none;border-radius:3px;cursor:pointer;
+  font-family:inherit;font-size:13.5px;letter-spacing:3px;text-indent:3px;
+  transition:all .16s;
+}
+.sim-root .m-btn.primary{background:#2a1d10;color:#e5d2ae;}
+.sim-root .m-btn.primary:hover{background:#3d2a16;}
+.sim-root .m-btn.plain{background:transparent;color:#6b6450;border:1px solid #b5ae9c;}
+.sim-root .m-btn.plain:hover{border-color:#6b6450;color:#333;}
+
+/* 开场 */
+.sim-root .intro{
+  position:absolute;inset:0;z-index:120;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center,#1a1410 0%,#070504 100%);
+  cursor:pointer;transition:opacity .9s ease;color:#d8c49e;
+}
+.sim-root .intro.hide{opacity:0;pointer-events:none;}
+.sim-root .intro-title{
+  font-size:32px;letter-spacing:18px;text-indent:18px;font-weight:700;
+  text-shadow:0 0 34px rgba(220,180,110,.35);
+  animation:simGlow 3.2s ease-in-out infinite;
+}
+@keyframes simGlow{50%{text-shadow:0 0 60px rgba(240,200,130,.6);}}
+.sim-root .intro-sub{margin-top:16px;font-size:14px;letter-spacing:4px;opacity:.55;}
+.sim-root .intro-meta{margin-top:6px;font-size:12.5px;letter-spacing:2px;opacity:.4;}
+.sim-root .intro-tip{
+  margin-top:56px;font-size:12.5px;letter-spacing:5px;opacity:.38;
+  animation:simBreath 2s ease-in-out infinite;
+}
+@keyframes simBreath{50%{opacity:.8;}}
+
+/* 结算 */
+.sim-root .result{
+  position:absolute;inset:0;z-index:130;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(4,3,2,.82);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .6s;
+}
+.sim-root .result.show{opacity:1;pointer-events:auto;}
+.sim-root .result-card{
+  width:410px;max-height:88%;overflow-y:auto;
+  padding:38px 40px 30px;
+  background:linear-gradient(#fbf8ef,#f1ece0);
+  border-radius:3px;text-align:center;color:#222;
+  box-shadow:0 30px 70px rgba(0,0,0,.75),0 0 0 1px rgba(120,100,70,.2);
+}
+.sim-root .result-card h2{
+  margin:0 0 6px;font-size:19px;letter-spacing:5px;text-indent:5px;font-weight:700;
+}
+.sim-root .rc-line{height:1px;background:#c9c2b0;margin:14px 0 18px;}
+.sim-root .rc-score{font-size:14.5px;line-height:2.15;color:#333;}
+.sim-root .rc-score b{font-family:"Menlo",monospace;font-size:16px;color:#0f2454;}
+.sim-root .rc-main-score{font-size:15px;margin-bottom:8px;}
+.sim-root .rc-main-score .big{font-family:"Menlo",monospace;font-size:34px;color:#0f2454;}
+.sim-root .rc-pass{color:#1c7a3d;font-weight:700;}
+.sim-root .rc-fail{color:#b03030;font-weight:700;}
+.sim-root .rc-note{color:#b03030;}
+.sim-root .rc-btns{display:flex;justify-content:center;gap:14px;margin-top:24px;flex-wrap:wrap;}
+.sim-root .rc-btn{
+  padding:10px 26px;
+  font-family:inherit;font-size:13.5px;letter-spacing:3px;text-indent:3px;
+  background:#2a1d10;color:#e5d2ae;border:none;border-radius:3px;
+  cursor:pointer;transition:background .18s;
+}
+.sim-root .rc-btn:hover{background:#3d2a16;}
+.sim-root .rc-btn.plain{background:transparent;color:#6b6450;border:1px solid #b5ae7c;}
+.sim-root .rc-btn.plain:hover{border-color:#6b6450;color:#333;background:transparent;}
+
+/* 排版中 */
+.sim-root .boot-loading{
+  position:absolute;inset:0;z-index:90;
+  display:flex;align-items:center;justify-content:center;
+  color:#c9b391;font-size:13px;letter-spacing:6px;
+  background:radial-gradient(ellipse at center,#1a1410 0%,#070504 100%);
+}
+/* 测量容器 */
+.sim-root .sim-measurer{
+  position:absolute;left:-9999px;top:0;width:520px;
+  visibility:hidden;z-index:-1;
+}

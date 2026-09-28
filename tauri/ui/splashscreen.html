@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <title>途变</title>
+  <script>
+    // 首帧前同步定主题，避免深色用户看到白色闪屏。
+    // localStorage 与主窗口同源共享；custom:<id> 主题包回退浅色基础皮肤。
+    // 浏览器预览可用 #dark / #light 哈希强制指定（hashchange 即时切换）。
+    (function () {
+      function apply() {
+        try {
+          var h = location.hash;
+          var t = (h === "#dark" || h === "#light") ? h.slice(1) : localStorage.getItem("dotobe.theme");
+          document.documentElement.dataset.theme = (t === "dark") ? "dark" : "light";
+        } catch (e) { /* 隐私模式等拿不到 localStorage 时保持浅色 */ }
+      }
+      apply();
+      window.addEventListener("hashchange", apply);
+    })();
+  </script>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      display: grid; place-items: center;
+      background: var(--rice);
+      font-family: var(--font);
+      color: var(--text);
+      user-select: none; cursor: default;
+      overflow: hidden;
+    }
+    /* 亮色模式：暖纸色微光晕（深色模式保持 --rice 深底） */
+    html:not([data-theme="dark"]) body {
+      background: #f6f4ef;
+      background-image: radial-gradient(ellipse 80% 70% at 50% 42%,
+        #fefdfb 0%, #f4f1ea 52%, #e8e4da 100%);
+    }
+    .splash { display: flex; flex-direction: column; align-items: center; }
+    .splash .logo {
+      font-size: var(--fs-hero); font-weight: 200; letter-spacing: 0.04em;
+      color: var(--sky);
+      animation: logo-in 900ms var(--wa-ease) both;
+    }
+    .splash .tagline {
+      margin-top: 14px; font-size: var(--fs-small); font-weight: 300;
+      color: var(--text-2); letter-spacing: 0.32em; text-indent: 0.32em;
+      animation: rise-in var(--dur) var(--wa-ease) 250ms both;
+    }
+    .splash .dots {
+      display: flex; gap: 12px; margin-top: 56px;
+      animation: rise-in var(--dur) var(--wa-ease) 500ms both;
+    }
+    .splash .dots i {
+      width: 8px; height: 8px; border-radius: var(--r-full);
+      animation: breathe 2.4s var(--ease) infinite both;
+    }
+    .splash .dots i:nth-child(1) { background: var(--sky); }
+    .splash .dots i:nth-child(2) { background: var(--mint); animation-delay: 0.3s; }
+    .splash .dots i:nth-child(3) { background: var(--powder); animation-delay: 0.6s; }
+
+    /* —— 植物线描 · 四角构图生长（每株 3-4 叶，登录页同款线描语言） —— */
+    .flora { position: fixed; inset: 0; pointer-events: none; }
+    .flora .plant { position: absolute; opacity: 0.85; }
+    .flora svg {
+      width: 100%; height: 100%; display: block;
+      transform-origin: 50% 100%; /* 摇曳以根部为轴 */
+      animation: sway var(--sdur, 7s) var(--ease) var(--sd, 3s) infinite alternate;
+    }
+    .flora path, .flora circle {
+      fill: none; stroke: var(--mint); stroke-width: 1; stroke-linecap: round;
+      stroke-dasharray: 1; stroke-dashoffset: 0; /* 基态＝长成；生长靠动画从 1 描到 0 */
+      animation: draw var(--dd, 1.4s) var(--ease) var(--d, 0s) both;
+    }
+    .flora circle { stroke: var(--pink); } /* 枝头圆果点一点粉 */
+    @keyframes draw {
+      0%   { stroke-dashoffset: 1; opacity: 0; } /* 起笔前隐藏圆头伪影 */
+      8%   { opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+    /* 长成后的余韵：极轻摇曳，如风拂过（各株错峰异速，不同步） */
+    @keyframes sway {
+      from { transform: rotate(-0.6deg); }
+      to   { transform: rotate(0.6deg); }
+    }
+
+    /* 字标入场：字距由疏到定，如晨雾收拢 */
+    @keyframes logo-in {
+      from { opacity: 0; letter-spacing: 0.3em; }
+      to   { opacity: 1; letter-spacing: 0.04em; }
+    }
+    @keyframes rise-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(0.72); opacity: 0.45; }
+      50%      { transform: scale(1);    opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .splash .logo, .splash .tagline, .splash .dots, .splash .dots i { animation: none; }
+      .flora path, .flora circle, .flora svg { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="flora" aria-hidden="true">
+    <!-- pathLength=1 归一化；--d 起笔时刻 / --dd 运笔时长；--sd 起摆 / --sdur 摆动周期。
+         叶片起笔沿各自茎的贝塞尔取点，确保叶根贴茎；运笔均为主茎先出、叶片依次舒展、圆果最后。 -->
+    <!-- 左上 · 多叶枝条 -->
+    <span class="plant" style="left:3.5%; top:6%; width:300px; height:360px; --sd:3.2s; --sdur:7s">
+      <svg viewBox="0 0 120 140">
+        <path pathLength="1" style="--d:.15s; --dd:1.6s" d="M28 132 C 46 96, 40 62, 58 18" />
+        <path pathLength="1" style="--d:.95s; --dd:.85s" d="M40 94 C 24 90, 13 77, 11 58 C 31 62, 40 76, 40 94 Z" />
+        <path pathLength="1" style="--d:1.2s; --dd:.8s" d="M44 77 C 63 73, 76 60, 79 42 C 60 46, 47 59, 44 77 Z" />
+        <path pathLength="1" style="--d:1.45s; --dd:.7s" d="M47 60 C 34 56, 26 45, 24 30 C 40 34, 47 45, 47 60 Z" />
+        <circle pathLength="1" style="--d:1.75s; --dd:.6s" cx="58" cy="11" r="4.5" />
+        <circle pathLength="1" style="--d:1.9s; --dd:.5s" cx="10" cy="54" r="3.5" />
+      </svg>
+    </span>
+    <!-- 右上 · 斜出叶枝 -->
+    <span class="plant" style="right:5%; top:7%; width:210px; height:250px; --sd:4.4s; --sdur:8s">
+      <svg viewBox="0 0 120 140">
+        <path pathLength="1" style="--d:.4s; --dd:1.4s" d="M96 128 C 78 100, 74 70, 88 30" />
+        <path pathLength="1" style="--d:1.05s; --dd:.8s" d="M81 93 C 95 89, 105 77, 107 61 C 91 65, 83 77, 81 93 Z" />
+        <path pathLength="1" style="--d:1.3s; --dd:.8s" d="M80 74 C 66 70, 58 58, 56 42 C 72 46, 80 58, 80 74 Z" />
+        <path pathLength="1" style="--d:1.55s; --dd:.7s" d="M82 53 C 94 49, 100 39, 102 27 C 90 31, 84 41, 82 53 Z" />
+        <circle pathLength="1" style="--d:1.8s; --dd:.5s" cx="89" cy="24" r="3.5" />
+      </svg>
+    </span>
+    <!-- 左下 · 草叶小丛 -->
+    <span class="plant" style="left:5%; bottom:6%; width:200px; height:235px; --sd:3.8s; --sdur:6.5s">
+      <svg viewBox="0 0 120 140">
+        <path pathLength="1" style="--d:.3s; --dd:1.2s" d="M30 132 C 34 104, 30 82, 40 58" />
+        <path pathLength="1" style="--d:.55s; --dd:1.2s" d="M44 132 C 44 108, 52 90, 64 72" />
+        <path pathLength="1" style="--d:.9s; --dd:.7s" d="M58 132 L 58 96" />
+        <path pathLength="1" style="--d:1.25s; --dd:.8s" d="M58 104 C 46 100, 38 88, 36 72 C 52 76, 58 88, 58 104 Z" />
+        <path pathLength="1" style="--d:1.5s; --dd:.8s" d="M58 112 C 70 108, 78 98, 80 84 C 66 88, 60 98, 58 112 Z" />
+      </svg>
+    </span>
+    <!-- 右下 · 丛生嫩芽 -->
+    <span class="plant" style="right:4%; bottom:5%; width:270px; height:320px; --sd:4.7s; --sdur:7.5s">
+      <svg viewBox="0 0 120 140">
+        <path pathLength="1" style="--d:.5s; --dd:1.3s" d="M60 132 L 60 64" />
+        <path pathLength="1" style="--d:1.05s; --dd:.9s" d="M60 88 C 42 84, 30 70, 28 50 C 48 54, 58 68, 60 88 Z" />
+        <path pathLength="1" style="--d:1.3s; --dd:.9s" d="M60 100 C 78 96, 90 82, 92 62 C 72 66, 62 80, 60 100 Z" />
+        <path pathLength="1" style="--d:1.55s; --dd:.7s" d="M60 64 C 52 58, 48 48, 48 36 C 58 42, 62 52, 60 64 Z" />
+        <path pathLength="1" style="--d:.8s; --dd:1s" d="M52 132 C 46 112, 44 96, 48 80" />
+        <path pathLength="1" style="--d:.95s; --dd:1s" d="M70 132 C 76 114, 78 100, 74 86" />
+      </svg>
+    </span>
+  </div>
+  <div class="splash">
+    <div class="logo">途变</div>
+    <div class="tagline">知道你在改变</div>
+    <div class="dots"><i></i><i></i><i></i></div>
+  </div>
+</body>
+</html>

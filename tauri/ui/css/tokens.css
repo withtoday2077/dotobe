@@ -1,0 +1,118 @@
+/* ============================================================
+   Dotobe 日系清新设计令牌（Japanese Fresh Design Tokens）
+   依据《页面样式开发要求.md》：Ma 留白 / 侘寂 / 发丝边框 /
+   下划线输入 / duration-500 慢过渡 / 无阴影无渐变
+   ============================================================ */
+
+:root {
+  /* 原生控件（下拉弹层/滚动条等）跟随浅色渲染 */
+  color-scheme: light;
+
+  /* 色板 */
+  --sky: #64b5f6;            /* Primary Sky Blue */
+  --rice: #fafaf8;           /* Rice White 背景 */
+  --mint: #98d8c8;           /* Mint Green */
+  --pink: #ffb7c5;           /* Gentle Pink */
+  --powder: #b8d4e3;         /* Powder Blue */
+
+  --text: #4a5568;           /* 正文主色 */
+  --text-2: #7a8a9e;         /* 次要文字 */
+  --text-3: #b0b8c4;         /* 弱化文字 */
+  --border: #d4d4cf;         /* 暖中性边框 */
+
+  --faint-bg: #f4f3ef;       /* 极浅着色底（气泡/预览块） */
+
+  /* 语义 */
+  --ok: #2f7d5f;
+  --warn: #b07818;
+  --danger: #c73e4d;
+  --info: #56789f;
+
+  /* 浅着色底（tint 13%） */
+  --sky-t: rgba(100, 181, 246, 0.13);
+  --mint-t: rgba(152, 216, 200, 0.16);
+  --pink-t: rgba(255, 183, 197, 0.16);
+  --powder-t: rgba(184, 212, 227, 0.20);
+  --warn-t: rgba(176, 120, 24, 0.10);
+  --danger-t: rgba(199, 62, 77, 0.09);
+  --ok-t: rgba(47, 125, 95, 0.10);
+
+  /* 圆角：柔和，禁止方角 */
+  --r-card: 1rem;   /* 16px rounded-xl */
+  --r-lg: 0.75rem;  /* 12px */
+  --r-md: 0.625rem; /* 10px */
+  --r-full: 999px;
+
+  /* 发丝边框 */
+  --hairline: 1px solid rgba(212, 212, 207, 0.6);
+  --hairline-soft: 1px solid rgba(212, 212, 207, 0.35);
+
+  /* 极轻阴影（规范允许的 0_1px_3px_0.03 级别；默认不用） */
+  --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  /* 动效：晨雾般缓慢 */
+  --ease: cubic-bezier(0.45, 0, 0.55, 1);
+  --dur: 500ms;
+
+  /* 和风切换（参照"静けさ"参考稿）：缓进慢出，气息流动 */
+  --wa-ease: cubic-bezier(0.22, 0.68, 0.3, 1);
+  --wa-shu: #b5544a;   /* 朱红点缀 */
+
+  /* 间距刻度（8 基准 + Ma 大留白） */
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 48px;
+  --sp-6: 64px;
+  --sp-7: 96px;
+
+  /* 字号 */
+  --fs-hero: 2.75rem;
+  --fs-h1: 1.875rem;
+  --fs-h2: 1.375rem;
+  --fs-h3: 1.0625rem;
+  --fs-body: 0.9375rem;
+  --fs-small: 0.8125rem;
+  --fs-tiny: 0.72rem;
+
+  --font: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+}
+
+/* 深色皮肤（设置→外观切换） */
+[data-theme="dark"] {
+  /* 原生控件（下拉弹层/滚动条等）跟随深色渲染，避免浅色弹层配浅色文字 */
+  color-scheme: dark;
+
+  --rice: #1c1f26;
+  --sky: #64b5f6;
+  --mint: #7fc4b2;
+  --pink: #e5a3b1;
+  --powder: #9dbed2;
+
+  --text: #e4e8ee;
+  --text-2: #a8afba;
+  --text-3: #6f7682;
+  --border: #3a404c;
+
+  --faint-bg: rgba(255, 255, 255, 0.045);
+
+  --ok: #6fd0a8;
+  --warn: #e0af62;
+  --danger: #e57f8c;
+  --info: #9db4d6;
+
+  --sky-t: rgba(100, 181, 246, 0.16);
+  --mint-t: rgba(127, 196, 178, 0.16);
+  --pink-t: rgba(229, 163, 177, 0.14);
+  --powder-t: rgba(157, 190, 210, 0.16);
+  --warn-t: rgba(224, 175, 98, 0.12);
+  --danger-t: rgba(229, 127, 140, 0.12);
+  --ok-t: rgba(111, 208, 168, 0.12);
+
+  --hairline: 1px solid rgba(58, 64, 76, 0.9);
+  --hairline-soft: 1px solid rgba(58, 64, 76, 0.6);
+  --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --wa-ease: cubic-bezier(0.22, 0.68, 0.3, 1);
+  --wa-shu: #d98a80;
+}

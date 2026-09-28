@@ -1,0 +1,12 @@
+{
+  "format": "dotobe-plugin",
+  "id": "study-records",
+  "name": "学习记录",
+  "version": "1.0.0",
+  "description": "进行中考试、历史成绩与错题本：追踪每一场考试的进度，回顾成绩曲线，重刷错题查漏补缺。",
+  "icon": "history",
+  "minClient": "2.2.0",
+  "roles": null,
+  "entry": "js/index.js",
+  "css": ["css/study-records.css"]
+}

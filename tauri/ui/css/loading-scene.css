@@ -1,0 +1,349 @@
+/* ------------------------------------------------------------
+   小人看书 · 导航加载动画（背景透明，适配深浅主题）
+   场景卡片保留原设计配色；外围点点与文字使用主题令牌
+   ------------------------------------------------------------ */
+.load-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  background: transparent;
+  min-height: calc(100vh - 160px);
+}
+
+.load-scene .ls-scene {
+  background: #e9f0f8;
+  border-radius: 40px 40px 24px 24px;
+  padding: 2rem 3rem 1.8rem 3rem;
+  box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.18), inset 0 -2px 5px rgba(255, 255, 255, 0.3);
+  border-bottom: 8px solid #b0c6da;
+}
+
+.load-scene .ls-canvas {
+  position: relative;
+  width: 360px;
+  height: 240px;
+  margin: 0 auto;
+}
+
+.load-scene .ls-chair-shadow {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  height: 14px;
+  background: #a2b6cc;
+  border-radius: 50%;
+  filter: blur(6px);
+  opacity: 0.5;
+}
+
+.load-scene .ls-chair {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 170px;
+  height: 90px;
+}
+
+.load-scene .ls-chair-seat {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 170px;
+  height: 18px;
+  background: #8b6f4c;
+  border-radius: 12px 12px 6px 6px;
+  box-shadow: 0 5px 0 #5a4a34, 0 8px 8px rgba(0, 0, 0, 0.2);
+  z-index: 4;
+}
+
+.load-scene .ls-chair-back {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  width: 28px;
+  height: 70px;
+  background: #9d7e5e;
+  border-radius: 12px 12px 4px 4px;
+  box-shadow: -5px 0 0 #6e5a42, 0 5px 8px rgba(0, 0, 0, 0.2);
+  transform: rotate(4deg);
+  z-index: 3;
+}
+
+.load-scene .ls-chair-back2 {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  width: 28px;
+  height: 70px;
+  background: #9d7e5e;
+  border-radius: 12px 12px 4px 4px;
+  box-shadow: 5px 0 0 #6e5a42, 0 5px 8px rgba(0, 0, 0, 0.2);
+  transform: rotate(-4deg);
+  z-index: 3;
+}
+
+.load-scene .ls-person {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 130px;
+  z-index: 5;
+  animation: ls-breathe 3.5s infinite ease-in-out;
+}
+
+.load-scene .ls-head {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 52px;
+  background: #f7d9aa;
+  border-radius: 50% 50% 45% 45% / 55% 55% 40% 40%;
+  box-shadow: 0 5px 0 #e0b888, 0 10px 12px rgba(0, 0, 0, 0.1);
+  z-index: 6;
+}
+
+.load-scene .ls-hair {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 54px;
+  height: 30px;
+  background: #3a2c1e;
+  border-radius: 50% 50% 30% 30% / 70% 70% 20% 20%;
+  z-index: 7;
+}
+
+.load-scene .ls-eye-left,
+.load-scene .ls-eye-right {
+  position: absolute;
+  top: 20px;
+  width: 8px;
+  height: 8px;
+  background: #1e1e1e;
+  border-radius: 50%;
+  z-index: 8;
+  animation: ls-blink 3s infinite ease-in-out;
+}
+
+.load-scene .ls-eye-left { left: 13px; }
+.load-scene .ls-eye-right { right: 13px; }
+
+.load-scene .ls-cheek-left,
+.load-scene .ls-cheek-right {
+  position: absolute;
+  top: 30px;
+  width: 10px;
+  height: 6px;
+  background: #f8b0b0;
+  border-radius: 50%;
+  opacity: 0.7;
+  z-index: 7;
+}
+
+.load-scene .ls-cheek-left { left: 6px; }
+.load-scene .ls-cheek-right { right: 6px; }
+
+.load-scene .ls-neck {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 12px;
+  background: #f0c894;
+  border-radius: 4px;
+  z-index: 5;
+}
+
+.load-scene .ls-body {
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 54px;
+  height: 56px;
+  background: #4f6d8f;
+  border-radius: 45% 45% 30% 30% / 60% 60% 30% 30%;
+  box-shadow: inset -4px -4px 0 #3a5270, 0 6px 0 #2f4057;
+  z-index: 5;
+}
+
+.load-scene .ls-arm-left,
+.load-scene .ls-arm-right {
+  position: absolute;
+  top: 64px;
+  width: 36px;
+  height: 14px;
+  background: #4f6d8f;
+  border-radius: 12px;
+  box-shadow: 0 5px 0 #2f4057;
+  z-index: 6;
+}
+
+.load-scene .ls-arm-left {
+  left: -12px;
+  transform: rotate(-20deg);
+  transform-origin: right center;
+}
+
+.load-scene .ls-arm-right {
+  right: -12px;
+  transform: rotate(20deg);
+  transform-origin: left center;
+}
+
+.load-scene .ls-book {
+  position: absolute;
+  bottom: 68px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 84px;
+  height: 60px;
+  background: #d8a86b;
+  border-radius: 6px 12px 12px 6px;
+  box-shadow: inset -4px -4px 0 #b5824a, 0 8px 0 #7a5b38, 0 12px 15px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  perspective: 400px;
+  animation: ls-bookhold 2s infinite alternate ease-in-out;
+}
+
+.load-scene .ls-book-page-left {
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  width: 32px;
+  height: 48px;
+  background: #fef9e8;
+  border-radius: 4px 0 0 4px;
+  box-shadow: inset -2px 0 0 #ddd0b0;
+  z-index: 11;
+}
+
+.load-scene .ls-book-page-right {
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  width: 32px;
+  height: 48px;
+  background: #fef9e8;
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 2px 0 0 #ddd0b0;
+  z-index: 11;
+}
+
+.load-scene .ls-book-spine {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 46px;
+  background: #b17d4b;
+  border-radius: 2px;
+  z-index: 12;
+}
+
+.load-scene .ls-book-line {
+  position: absolute;
+  left: 12px;
+  top: 16px;
+  width: 24px;
+  height: 2px;
+  background: #aaa28b;
+  border-radius: 2px;
+  z-index: 12;
+  box-shadow: 0 8px 0 #aaa28b, 0 16px 0 #aaa28b, 0 24px 0 #aaa28b;
+}
+
+.load-scene .ls-leg-left,
+.load-scene .ls-leg-right {
+  position: absolute;
+  bottom: 0;
+  width: 22px;
+  height: 34px;
+  background: #3f5570;
+  border-radius: 12px 12px 8px 8px;
+  box-shadow: 0 6px 0 #263342;
+  z-index: 2;
+}
+
+.load-scene .ls-leg-left { left: 26px; }
+.load-scene .ls-leg-right { right: 26px; }
+
+.load-scene .ls-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.load-scene .ls-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.load-scene .ls-dots i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--powder);
+  animation: ls-bounce 1.4s infinite ease-in-out both;
+}
+
+.load-scene .ls-dots i:nth-child(1) { animation-delay: -0.32s; background: var(--sky); }
+.load-scene .ls-dots i:nth-child(2) { animation-delay: -0.16s; background: var(--mint); }
+.load-scene .ls-dots i:nth-child(3) { animation-delay: 0s; background: var(--pink); }
+
+.load-scene .ls-text {
+  margin-top: 14px;
+  color: var(--text-2);
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 6px;
+  animation: ls-pulsetext 2s infinite;
+}
+
+/* 书本拿取浮动 */
+@keyframes ls-bookhold {
+  0% { transform: translateX(-50%) rotate(-2deg) translateY(0); }
+  100% { transform: translateX(-50%) rotate(-1deg) translateY(-3px); }
+}
+
+/* 眨眼 */
+@keyframes ls-blink {
+  0%, 96%, 100% { transform: scaleY(1); }
+  98% { transform: scaleY(0.1); }
+}
+
+/* 加载点点 */
+@keyframes ls-bounce {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+  40% { transform: scale(1.1); opacity: 1; }
+}
+
+/* 文字呼吸 */
+@keyframes ls-pulsetext {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* 小人呼吸感 */
+@keyframes ls-breathe {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .load-scene *, .load-scene { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}

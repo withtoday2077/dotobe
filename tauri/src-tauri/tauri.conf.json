@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "途变客户端",
+  "version": "2.2.0",
+  "identifier": "cn.dotobe.exam",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "splashscreen",
+        "title": "途变",
+        "url": "splashscreen.html",
+        "width": 1280,
+        "height": 820,
+        "center": true,
+        "decorations": false,
+        "resizable": false,
+        "skipTaskbar": true,
+        "dragDropEnabled": false
+      },
+      {
+        "label": "main",
+        "title": "途变 · 知道你在改变",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 1024,
+        "minHeight": 660,
+        "center": true,
+        "decorations": false,
+        "visible": false,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": []
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller"
+      },
+      "nsis": {
+        "languages": ["SimpChinese", "English"]
+      }
+    }
+  }
+}

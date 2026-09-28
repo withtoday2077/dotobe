@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主题包 harness · 莓好咖啡屋</title>
+<!-- Tauri 桩：theme.js → api.js 依赖 window.__TAURI__.core，纯浏览器环境先注入 -->
+<script>
+  window.__TAURI__ = { core: { invoke: async (cmd) => { throw new Error("桩环境无命令：" + cmd); } } };
+  window.__errors = [];
+  window.addEventListener("error", (e) => window.__errors.push(String(e.message || e.error)));
+</script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/pages.css">
+<style>body{padding:0}.result{position:fixed;left:16px;bottom:16px;z-index:200;background:#fff;border:1px solid var(--hairline);border-radius:12px;padding:10px 16px;font-size:12px;color:var(--text-2);max-width:380px}</style>
+</head>
+<body>
+<main class="main">
+  <div class="wa-wash"></div>
+  <div class="content page">
+    <div class="topbar"><span class="title">控制台</span></div>
+    <div class="dash-greet" style="position:relative">
+      <h1>下午好，佐仓</h1>
+      <div class="date">2026 年 9 月 27 日 · 星期日 <span style="color:var(--info)">学习进度 68%（34/50 场已通过）</span></div>
+    </div>
+    <div class="grid cols-4">
+      <div class="card stat sky"><div class="label">本月平均分</div><div class="value">86.5</div><div class="sub">较上月 +2.3</div></div>
+      <div class="card stat mint"><div class="label">本周考试</div><div class="value">3</div><div class="sub">还有 1 场待完成</div></div>
+      <div class="card stat pink"><div class="label">历史最高分</div><div class="value">98</div><div class="sub">模拟考试 · 高数</div></div>
+      <div class="card stat warn"><div class="label">刷题连击</div><div class="value">12 天</div><div class="sub">继续保持</div></div>
+    </div>
+    <div class="grid cols-3" style="margin-top:24px">
+      <div class="card">
+        <div class="card-title"><h3>推荐考试</h3><span class="chip pink">限时</span></div>
+        <p style="font-size:var(--fs-small);color:var(--text-2)">期末模拟 · 软件工程</p>
+        <div style="margin-top:12px;display:flex;gap:8px"><button class="btn primary sm">进入考场</button><button class="btn sm">详情</button></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><h3>每日刷题</h3><span class="chip mint">连续 12 天</span></div>
+        <p style="font-size:var(--fs-small);color:var(--text-2)">数据结构 · 二叉树专题，今日 20 题</p>
+        <div style="margin-top:12px"><button class="btn sm">开始刷题</button></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><h3>知识树</h3><span class="chip sky">3 棵</span></div>
+        <p style="font-size:var(--fs-small);color:var(--text-2)">操作系统 · 进程与线程，待浇灌 5 张卡片</p>
+        <div style="margin-top:12px"><button class="btn sm">去浇灌</button></div>
+      </div>
+    </div>
+    <div class="auth-brand" style="margin-top:48px"><div class="logo">途变</div><div class="tagline">知道你在改变</div></div>
+  </div>
+</main>
+<div class="result" id="result">正在加载主题…</div>
+<script type="module">
+  const out = (t) => { document.getElementById("result").textContent = t; };
+  try {
+    const { validateTheme, applyTheme } = await import("./js/theme.js");
+    const pkg = await (await fetch("/themes/kawaii-cafe.dtheme")).json();
+    const errs = validateTheme(pkg);
+    if (errs.length) { out("✗ 校验失败：" + errs.join("；")); }
+    else {
+      applyTheme(pkg);
+      await document.fonts.ready;
+      await document.fonts.load('16px "ZCOOL QingKe HuangYou"');
+      await document.fonts.load('16px "M PLUS Rounded 1c"');
+      const f1 = document.fonts.check('16px "ZCOOL QingKe HuangYou"');
+      const f2 = document.fonts.check('16px "M PLUS Rounded 1c"');
+      const cs = getComputedStyle(document.documentElement);
+      out(`✓ 已应用「${pkg.name}」| 黄油体:${f1 ? "✓" : "✗"} 圆体拉丁:${f2 ? "✓" : "✗"} | `
+        + `rice:${cs.getPropertyValue("--rice").trim()} sky:${cs.getPropertyValue("--sky").trim()}`
+        + (window.__errors.length ? ` | 页面错误:${window.__errors.join(" / ")}` : " | 无页面错误"));
+    }
+  } catch (e) { out("✗ " + (e.message || e)); }
+</script>
+</body>
+</html>

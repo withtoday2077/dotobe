@@ -1,0 +1,12 @@
+{
+  "format": "dotobe-plugin",
+  "id": "guild",
+  "name": "冒险公会",
+  "version": "1.0.0",
+  "description": "任务悬赏、见闻手札、学习小队与冒险者成长体系——把学习变成一场冒险。",
+  "icon": "hall",
+  "minClient": "2.2.0",
+  "roles": null,
+  "entry": "js/index.js",
+  "css": ["css/guild.css"]
+}
