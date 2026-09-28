@@ -27,7 +27,7 @@ Rust lib.rs                          ← plugin_download/install/uninstall/list_
 
 安装状态**只存本地**（数据目录 `plugins/<id>/` 目录存在即已安装），不上服务端。
 
-## 5 分钟上手：新增一个插件
+## 快速上手：新增一个插件
 
 ### 1. 建目录与 manifest
 
@@ -38,8 +38,8 @@ desktop-client/plugins/hello/manifest.json
   "id": "hello",                 // 小写字母开头，3-63 位 [a-z0-9-]
   "name": "问候",
   "version": "1.0.0",
-  "description": "市场卡片文案",
-  "icon": "tree",                // 市场图标：客户端 CATALOG_ICONS 内置名，未知回退拼图
+  "description": " 卡片文案",
+  "icon": "tree",                //  图标：客户端 CATALOG_ICONS 内置名，未知回退拼图
   "minClient": "2.2.0",
   "roles": null,                 // 或 ["teacher","admin"]：市场对学生隐藏
   "entry": "js/index.js",
