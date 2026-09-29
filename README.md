@@ -1,4 +1,4 @@
-# 途变 · 在线考试系统桌面客户端（Dotobe Exam Client）
+# 途变 · 全功能学习桌面客户端（Dotobe Exam Client）
 
 基于 **Tauri 2** 的跨平台桌面客户端（Windows / Android），对接在线考试系统 PHP 后端
 （默认 `https://www.dotobe.cn`，可在设置中更换）。//因为作者自己的服务器是这个，所以没改，需要的可以自己搭建服务器切换到自己服务器即可。
