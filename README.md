@@ -84,3 +84,9 @@ cd plugins && php build.php      # 产出 zip + sha256 到服务端 uploads/plug
 ## License
 
 仅供学习交流使用。
+
+<img width="1919" height="1230" alt="image" src="https://github.com/user-attachments/assets/d92f6009-fd51-42a3-8cf4-ef5901a2a789" />
+<img width="1919" height="1230" alt="image" src="https://github.com/user-attachments/assets/079d640c-2d90-49f3-ac1e-bf8d6d578742" />
+<img width="1919" height="1230" alt="image" src="https://github.com/user-attachments/assets/896a13d3-322c-41e1-8d22-e0cde623c63b" />
+
+
